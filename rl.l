@@ -11,3 +11,10 @@ temperature             return TOKTEMPERATURE;
 \n                      /* игнорируем символ конца строки */;
 [ \t]+                  /* игнорируем пробелы и символы табуляции */;
 %%
+
+int main() {
+    yyin = fopen("tests.txt","r");
+    yylex();
+
+    return 0;
+}
