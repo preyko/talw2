@@ -22,7 +22,7 @@ main()
 	
 	do {
         	yyparse();
-	} while(!feof(yyin));
+	} while(!foef(yyin));
 }
 
 %}
