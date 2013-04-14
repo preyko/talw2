@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define YYSTYPE char *
+
 void yyerror(const char *str)
 {
         fprintf(stderr,"ошибка: %s\n",str);
@@ -19,29 +21,55 @@ main()
 
 %}
 
-%token NUMBER TOKHEAT STATE TOKTARGET TOKTEMPERATURE
+%token ZONETOK FILETOK WORD FILENAME QUOTE OBRACE EBRACE SEMICOLON
 
 %%
-commands: /* empty */
-        | commands command
+commands:
+        |
+        commands command SEMICOLON
         ;
+
 
 command:
-        heat_switch
+        zone_set
+        ;
+
+zone_set:
+        ZONETOK quotedname zonecontent
+        {
+                printf("Найдена полная зона для '%s'\n",$2);
+        }
+        ;
+
+zonecontent:
+        OBRACE zonestatements EBRACE
+
+quotedname:
+        QUOTE FILENAME QUOTE
+        {
+                $$=$2;
+        }
+
+zonestatements:
         |
-        target_set
+        zonestatements zonestatement SEMICOLON
         ;
 
-heat_switch:
-        TOKHEAT STATE
+zonestatement:
+        statements
+        |
+        FILETOK quotedname
         {
-                printf("\tОбогреватель включен или выключен\n");
+                printf("Обнаружено имя файла зоны '%s'\n", $2);
         }
         ;
 
-target_set:
-        TOKTARGET TOKTEMPERATURE NUMBER
-        {
-                printf("\tТемпература установлена\n");
-        }
+block:
+        OBRACE zonestatements EBRACE SEMICOLON
         ;
+
+statements:
+        | statements statement
+        ;
+
+statement: WORD | block | quotedname

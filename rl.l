@@ -1,20 +1,18 @@
 %{
 #include <stdio.h>
-#include "rl.tab.h"
+#include "y.tab.h"
 %}
-%%
-[0-9]+                  return NUMBER;
-heat                    return TOKHEAT;
-on|off                  return STATE;
-target                  return TOKTARGET;
-temperature             return TOKTEMPERATURE;
-\n                      /* игнорируем символ конца строки */;
-[ \t]+                  /* игнорируем пробелы и символы табуляции */;
+
 %%
 
-int main() {
-    yyin = fopen("tests.txt","r");
-    yylex();
-
-    return 0;
-}
+zone                    return ZONETOK;
+file                    return FILETOK;
+[a-zA-Z][a-zA-Z0-9]*    yylval=strdup(yytext); return WORD;
+[a-zA-Z0-9\/.-]+        yylval=strdup(yytext); return FILENAME;
+\"                      return QUOTE;
+\{                      return OBRACE;
+\}                      return EBRACE;
+;                       return SEMICOLON;
+\n                      /* пропускаем концы строк */;
+[ \t]+                  /* пропускаем пробелы */;
+%%
