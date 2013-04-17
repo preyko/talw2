@@ -1,12 +1,5 @@
-YACC=bison
-LEX=flex
-BUILDDIR=build
-
-all: rl.l rl.y
-	$(YACC) -d rl.y
-	$(LEX) rl.l
-	mkdir -p $(BUILDDIR)
-	gcc lex.yy.c rl.tab.c -o $(BUILDDIR)/test
-
-clear:
-	rm -r build
+all:
+	flex rl.l
+	bison -d rl.y -o rl.cc
+	gcc -lfl -c lex.yy.c -o rl.o
+	g++ rl.o rl.cc -o rltest 

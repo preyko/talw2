@@ -1,0 +1,29 @@
+CC = g++
+YACC=bison
+YACC_PARAMS=--debug --verbose
+LEX=flex
+
+BUILDDIR=build
+
+YACCI=rl.y
+LEXI=rl.l
+
+YACCC=rl.tab.c
+YACCH=rl.tab.h
+LEXC=lex.yy.c
+
+all: rl.l rl.y
+	$(YACC) -d $(YACCI)
+	$(LEX) $(LEXI)
+	$(CC) -lfl $(YACCC) $(LEXC) -o btest
+	./btest
+
+debug: 
+	$(YACC) -d $(YACC_PARAMS) $(YACCI)
+	$(LEX) $(LEXI)
+	$(CC) $(YACCC) $(LEXC) -o btest
+	./btest
+
+
+clear:
+	rm $(YACCC) $(LEXC) $(YACCH) rl.output btest

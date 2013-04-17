@@ -2,80 +2,105 @@
 #include <stdio.h>
 #include <string.h>
 
-#define YYSTYPE char *
+//#define YYSTYPE char*
 
-FILE* yyin;
 
-void yyerror(const char *str)
-{
-        fprintf(stderr,"ошибка: %s\n",str);
+int yydebug = 1;
+
+extern FILE* yyin;
+
+extern "C" {
+	int yyparse(void);
+	int yywrap(void);
+	int yylex(void);
+	
+	int main(int,const char**);
 }
 
-int yywrap()
-{
+void yyerror(const char* str) {
+        fprintf(stderr,"Error: %s\n",str);
+}
+
+int yywrap() {
         return 1;
 }
 
-main()
-{
+int main(int argn,const char** arg) {
 	yyin = fopen("tests.txt","r");
 	
 	do {
         	yyparse();
 	} while(!feof(yyin));
+
+	return 0;
 }
 
 %}
 
-%token ZONETOK FILETOK WORD FILENAME QUOTE OBRACE EBRACE SEMICOLON
+%start body
+%token OBRACE EBRACE OFBRACE EFBRACE SEMICOLON TEST // DELIMETRS
+BOOLIDNT NUMBIDNT // IDENTIFIER
+BOOLCONST NUMBCONST // CONSTANT
+ASSIGOPER EQOPER INCOPER DECOPER // OPERATORS
 
 %%
-commands:
+body:
         |
-        commands command SEMICOLON
+        body command
         ;
-
 
 command:
-        zone_set
-        ;
+	operators SEMICOLON
+//	|
+//	OFBRACE command EFBRACE {
+//		printf("One entry in bracers\n");
+//	}
+	;
 
-zone_set:
-        ZONETOK quotedname zonecontent
-        {
-                printf("Найдена полная зона для '%s'\n",$2);
-        }
-        ;
+const:
+	BOOLCONST {
+		$$=$1;
+	}
+	|
+	NUMBCONST {
+		$$=$1;
+	}
+	;
 
-zonecontent:
-        OBRACE zonestatements EBRACE
+ident:
+	BOOLIDNT {
+		$$=$1;
+	}
+	|
+	NUMBIDNT {
+		$$=$1;
+	}
+	;
 
-quotedname:
-        QUOTE FILENAME QUOTE
-        {
-                $$=$2;
-        }
+operators:
+	returnable_operators
+	|
+	nonreturnable_operators
+	;
+	
+returnable_operators:
+	ident ASSIGOPER const {
+		printf("Ident %d = %d\n",$1,$3);
+	}
+	|
+	ident EQOPER const {
+		printf("Ident %d == %d\n",$1,$3);
+	}
+	|
+	ident DECOPER {
+		printf("Ident %d decrement\n",$1);
+	}
+	|
+	ident INCOPER {
+		printf("Ident %d increment\n",$1);
+	}
+	;
 
-zonestatements:
-        |
-        zonestatements zonestatement SEMICOLON
-        ;
-
-zonestatement:
-        statements
-        |
-        FILETOK quotedname
-        {
-                printf("Обнаружено имя файла зоны '%s'\n", $2);
-        }
-        ;
-
-block:
-        OBRACE zonestatements EBRACE SEMICOLON
-        ;
-
-statements:
-        | statements statement
-        ;
-
-statement: WORD | block | quotedname
+nonreturnable_operators:
+	TEST
+	;
