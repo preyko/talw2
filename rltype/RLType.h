@@ -2,11 +2,7 @@
 #include <string>
 #include <map>
 
-enum RLOperator { increment, decrement, assign, compare };
-
-struct RLTypeMeta {
-	std::string typeName;	
-};
+enum RLOperator { increment, decrement, assign, compare, arrayat };
 
 /* Solution to the crosslinks problem */
 class RLType;
@@ -26,18 +22,27 @@ private:
 
 class RLType {
 public:
+	enum RLTypeQualifier { Base, Bool, Number, Array };
+	
+	struct RLTypeMeta {
+		RLTypeQualifier typeName;	
+	};
+
+    static void setRegister(RLIdentifierRegister* iregister);
+    static std::string typeName(RLTypeQualifier qualifier);
+
 	RLType();
 
 	bool reg(int id);
 
 	virtual RLType* copy() const;
 
-	virtual bool applyUnary(RLOperator);
-	virtual bool applyBinary(RLOperator, RLType*);
+    virtual RLType applyUnary(RLOperator);
+    virtual RLType applyBinary(RLOperator, RLType*);
 
-	std::string getTypeName() const;
+    RLTypeQualifier getTypeQualifier() const;
 
-	static void setRegister(RLIdentifierRegister* iregister);
+    virtual void print();
 
 protected:
 	RLTypeMeta meta_;
@@ -50,11 +55,15 @@ public:
 	RLBool(bool value);
 	RLBool(bool value, int id);
 
-	bool getValue();
+	virtual RLType* copy() const;
+
+	bool getValue() const;
 	void setValue(bool val);
 
-	virtual bool applyUnary(RLOperator oper);
-	virtual bool applyBinary(RLOperator oper, RLType* val);
+    virtual RLType applyUnary(RLOperator oper);
+    virtual RLType applyBinary(RLOperator oper, RLType* val);
+
+    virtual void print();
 
 protected:
 	bool value_;
@@ -68,15 +77,47 @@ public:
 	RLNumber(int value);
 	RLNumber(int value, int id);
 
-	bool getValue();
-	void setValue(bool val);
+	virtual RLType* copy() const;
 
-	virtual bool applyUnary(RLOperator oper);
-	virtual bool applyBinary(RLOperator oper, RLType* val);
+	int getValue() const;
+	void setValue(int val);
+
+    virtual RLType applyUnary(RLOperator oper);
+    virtual RLType applyBinary(RLOperator oper, RLType* val);
+
+    virtual void print();
 
 protected:
 	int value_;
 
 private:
 	void init_(int val);
+};
+
+class RLArray : public RLType {
+public:
+    typedef std::map<int, RLType*> RLArrayStorage;
+    typedef std::pair<int, RLType*> RLArrayStoragePair;
+
+    RLArray(RLTypeQualifier qualifier);
+    RLArray(RLTypeQualifier qualifier, int key);
+
+	virtual RLType* copy() const;
+
+    void setElem(int pos, RLType* element);
+    RLType* getElem(int pos) const;
+
+    RLTypeQualifier getElemQualifier() const;
+
+    virtual RLType applyUnary(RLOperator oper);
+    virtual RLType applyBinary(RLOperator oper, RLType* val);
+
+    virtual void print();
+
+protected:
+    RLTypeQualifier arrayType_;
+    RLArrayStorage elements_;
+
+private:
+    void init_(RLTypeQualifier qualifier);
 };

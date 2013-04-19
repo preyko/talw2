@@ -1,6 +1,5 @@
-#include <iostream>
-
 #include "RLType.h"
+
 
 /*
  * class RLIdentifierRegister
@@ -13,9 +12,8 @@ bool RLIdentifierRegister::add(int id, RLType* identifier) {
 	} else {
 		// Bring an ERROR:
 		// ID collision.
-#ifdef RLINTERP_DEBUG
 		std::cout << "ERROR: ID collision.\n";
-#endif
+
 		return false;
 	}
 }
@@ -35,6 +33,12 @@ RLType::RLType() {
 }
 
 bool RLType::reg(int id) {
+    if(iregister_==NULL) {
+        // ERROR! Register of identifier has not been declared,\n\tso use static method RLType::setRegister(RLIdentifierRegister*)
+        std::cout << "ERROR: Register of identifier has not been declared,\n\tso use static method RLType::setRegister(RLIdentifierRegister*)\n";
+
+        return false;
+    }
 	return iregister_->add(id,this);
 }
 
@@ -42,28 +46,50 @@ RLType* RLType::copy() const {
 	return new RLType();
 }
 
-bool RLType::applyUnary(RLOperator) {
+RLType RLType::applyUnary(RLOperator) {
 	// ERROR! Can't apply any operator for base RLType
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't apply any operator for base RLType.\n";
-#endif
-	return false;
+    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
+
+    return RLBool(false);
 }
 
-bool RLType::applyBinary(RLOperator, RLType*) {
+RLType RLType::applyBinary(RLOperator, RLType*) {
 	// ERROR! Can't apply any operator for base RLType
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't apply any operator for base RLType.\n";
-#endif
-	return false;
+    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
+
+    return RLBool(false);
 }
 
-std::string RLType::getTypeName() const {
-	return meta_.typeName;
+void RLType::print() {
+    std::cout << "RLType = Base." << std::endl;
 }
 
 void RLType::setRegister(RLIdentifierRegister* iregister) {
-	iregister_ = iregister;
+    iregister_ = iregister;
+}
+
+RLType::RLTypeQualifier RLType::getTypeQualifier() const {
+    return meta_.typeName;
+}
+
+std::string RLType::typeName(RLType::RLTypeQualifier qualifier) {
+    switch(qualifier) {
+    case Base:
+        return "Base";
+    break;
+    case Bool:
+        return "Bool";
+    break;
+    case Number:
+        return "Number";
+    break;
+    case Array:
+        return "Array";
+    break;
+    default:
+        return "Unknown";
+    break;
+    }
 }
 
 
@@ -79,58 +105,62 @@ RLBool::RLBool(bool val, int id) {
 }
 void RLBool::init_(bool val) {
 	setValue(val);
-	meta_.typeName = "RLBool";
+	meta_.typeName = Bool;
 }
 
-bool RLBool::getValue() {
+RLType* RLBool::copy() const {
+	return new RLBool(getValue());
+}
+
+bool RLBool::getValue() const {
 	return value_;
 }
 void RLBool::setValue(bool val) {
 	value_ = val;
 }
 
-bool RLBool::applyUnary(RLOperator oper) {
+RLType RLBool::applyUnary(RLOperator oper) {
 	// ERROR! Not one unary operators not exist for RLBool
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Not one unary operators not exist for RLBool.\n";
-#endif
+    std::cout << "ERROR: Not one unary operators not exist for RLBool.\n";
+
 }
 
-bool RLBool::applyBinary(RLOperator oper, RLType* val) {
+RLType RLBool::applyBinary(RLOperator oper, RLType* val) {
 	switch(oper) {
 	case compare:
-		if(val->getTypeName()=="RLBool") {
+		if(val->getTypeQualifier()==Bool) {
 			RLBool* valb = (RLBool*)val;
-			return getValue() == valb->getValue();
-		} else if(val->getTypeName()=="RLNumber") {
+            return RLBool(getValue() == valb->getValue());
+		} else if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
-			return getValue() == (bool)valn->getValue();
+            return RLBool(getValue() == (bool)valn->getValue());
 		} else {
-			// Can't compare RLBool with val->getTypeName()
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't compare RLBool with " << val->getTypeName() << ".\n";
-#endif
+			// Can't compare RLBool with val->getTypeQualifier()
+            std::cout << "ERROR: Can't compare RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+
 		}
 	break;
 	case assign:
-		if(val->getTypeName()=="RLBool") {
+		if(val->getTypeQualifier()==Bool) {
 			RLBool* valb = (RLBool*)val;
 			setValue(valb->getValue());
-			return true;
+            return RLBool(true);
 		} else {
-			// Can't assign RLBool with val->getTypeName()
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't assign RLBool with " << val->getTypeName() << ".\n";
-#endif
+			// Can't assign RLBool with val->getTypeQualifier()
+            std::cout << "ERROR: Can't assign RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+            return RLBool(false);
 		}
 	break;
 	default:
-		// Unexpected unary operator for RLBool
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Unexpected unary operator for RLBool.\n";
-#endif
+        // Unexpected binary operator for RLBool
+        std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
+        return RLBool(false);
 	break;
-	}
+    }
+}
+
+void RLBool::print() {
+    std::cout << "RLType = Bool, Value = " << value_ << std::endl;
 }
 
 
@@ -146,17 +176,21 @@ RLNumber::RLNumber(int val, int id) {
 }
 void RLNumber::init_(int val) {
 	setValue(val);
-	meta_.typeName = "RLNumber";
+	meta_.typeName = Number;
 }
 
-bool RLNumber::getValue() {
+RLType* RLNumber::copy() const {
+	return new RLNumber(getValue());
+}
+
+int RLNumber::getValue() const {
 	return value_;
 }
-void RLNumber::setValue(bool val) {
+void RLNumber::setValue(int val) {
 	value_ = val;
 }
 
-bool RLNumber::applyUnary(RLOperator oper) {
+RLType RLNumber::applyUnary(RLOperator oper) {
 	switch(oper) {
 	case increment:
 		value_++;
@@ -166,44 +200,203 @@ bool RLNumber::applyUnary(RLOperator oper) {
 	break;
 	default:
 		// Unexpected unary operator for RLNumb
-#ifdef RLINTERP_DEBUG
 		std::cout << "ERROR: Unexpected unary operator for RLNumb.\n";
-#endif
+        return RLBool(false);
 	break;
-	}		
+    }
+    return RLBool(true);
 }
 
-bool RLNumber::applyBinary(RLOperator oper, RLType* val) {
-	switch(oper) {
+RLType RLNumber::applyBinary(RLOperator oper, RLType* val) {
+    switch(oper) {
 	case compare:
-		if(val->getTypeName()=="RLNumber") {
+		if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
-			return getValue() == valn->getValue();
+            return RLBool(getValue() == valn->getValue());
 		} else {
-			// Can't compare RLNumb with val->getTypeName()
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't compare RLNumb with " << val->getTypeName() << ".\n";
-#endif
+			// Can't compare RLNumb with val->getTypeQualifier()
+            std::cout << "ERROR: Can't compare RLNumb with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+
+            return RLBool(false);
 		}
 	break;
 	case assign:
-		if(val->getTypeName()=="RLNumber") {
+		if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
 			setValue(valn->getValue());			
-			return true;
+            return RLBool(true);
 		} else {
-			// Can't assign RLNumb with val->getTypeName()
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Can't assign RLNumb with " << val->getTypeName() << ".\n";
-#endif
+			// Can't assign RLNumb with val->getTypeQualifier()
+            std::cout << "ERROR: Can't assign RLNumb with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+
+            return RLBool(false);
 		}
 	break;
 	default:
-		// Unexpected unary operator for RLBool
-#ifdef RLINTERP_DEBUG
-		std::cout << "ERROR: Unexpected unary operator for RLBool.\n";
-#endif
+        // Unexpected binary operator for RLBool
+        std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
+        return RLBool(false);
 	break;
-	}
+    }
 }
+
+void RLNumber::print() {
+    std::cout << "RLType = Number, value = " << value_ << std::endl;
+}
+
+
+/*
+ * class RLArray : public RLType
+ */
+RLArray::RLArray(RLTypeQualifier qualifier) {
+    init_(qualifier);
+}
+RLArray::RLArray(RLTypeQualifier qualifier, int id) {
+    init_(qualifier);
+    reg(id);
+}
+
+void RLArray::init_(RLTypeQualifier qualifier) {
+    meta_.typeName = Array;
+    arrayType_ = qualifier;
+}
+
+RLType* RLArray::copy() const {
+    RLArray* temp = new RLArray(getElemQualifier());
+
+    for(RLArrayStorage::const_iterator i=elements_.begin();i!=elements_.end();i++) {
+        temp->elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
+    }
+
+    return temp;
+}
+
+RLType* RLArray::getElem(int pos) const {
+    if(elements_.find(pos)==elements_.end()) {
+        // No such element in RLArray
+        std::cout << "ERROR: No such element in RLArray with index " << pos << ".\n";
+
+        return NULL;
+    } else {
+        return elements_.find(pos)->second;
+    }
+}
+
+void RLArray::setElem(int pos, RLType* element) {
+    if(element->getTypeQualifier()!=getElemQualifier()) {
+        // ERROR: Can't put different RLType in this Array
+        std::cout << "ERROR: Can\'t put "
+                  << RLType::typeName(element->getTypeQualifier())
+                  << " type in Array of "
+                  << RLType::typeName(getElemQualifier())
+                  << ".\n";
+
+        return;
+    }
+    elements_.insert(RLArrayStoragePair(pos,element));
+}
+
+RLType::RLTypeQualifier RLArray::getElemQualifier() const {
+    return arrayType_;
+}
+
+RLType RLArray::applyUnary(RLOperator oper) {
+    // ERROR! Not one unary operators not exist for RLArray
+    std::cout << "ERROR: Not one unary operators not exist for RLArray.\n";
+
+    return RLBool(false);
+}
+
+RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
+    switch(oper) {
+    case compare:
+        if(val->getTypeQualifier()==Array) {
+            RLArray* vala = (RLArray*)val;
+
+            if(vala->getElemQualifier() != getElemQualifier()) {
+                // Different elements types
+                return RLBool(false);
+            }
+
+            if(elements_.size()!=vala->elements_.size()) {
+                // Different arrays size
+                return new RLBool(false);
+            }
+
+            RLArrayStorage::const_iterator i1 = elements_.begin();
+            RLArrayStorage::const_iterator i2 = vala->elements_.begin();
+
+            for(; i1 != elements_.end(); i1++, i2++) {
+                RLType res = i1->second->applyBinary(compare,i2->second).getValue();
+                if(res.getTypeQualifier()==Bool)
+
+                if() {
+                    return RLBool(false);
+                }
+            }
+
+            return RLBool(true);
+        } else {
+            // Can't compare RLArray with val->getTypeQualifier()
+            std::cout << "ERROR: Can't compare RLArray with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+
+        }
+    break;
+    case assign:
+        if(val->getTypeQualifier()==Array) {
+            RLArray* vala = (RLArray*)val;
+
+            if(vala->getElemQualifier() != getElemQualifier()) {
+                // Different elements types
+                return RLBool(false);
+            }
+
+            RLArrayStorage::const_iterator i;
+
+            for(i = vala->elements_.begin(); i != vala->elements_.end(); i++) {
+                if(!i->second->applyBinary(compare,i->second)) {
+                    elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
+                }
+            }
+
+            return RLBool(true);
+        } else {
+            // Can't assign RLArray with val->getTypeQualifier()
+            std::cout << "ERROR: Can't assign RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
+
+            return RLBool(false);
+        }
+    break;
+    case arrayat:
+        if(val->getTypeQualifier()==Number) {
+            RLNumber* valn = (RLNumber*)val;
+
+
+
+            return RLBool(true);
+        } else {
+            // Only RLNumber can be used in[]
+            std::cout << "ERROR: Only RLNumber can be used in[].\n";
+
+        }
+    default:
+        // Unexpected binary operator for RLArray
+        std::cout << "ERROR: Unexpected binary operator for RLArray.\n";
+
+        return RLBool(false);
+    break;
+    }
+}
+
+void RLArray::print() {
+    std::cout << "RLType = Array of " << RLType::typeName(getElemQualifier()) << ".\n\tValues\n";
+
+    RLArrayStorage::const_iterator i;
+    for(i = elements_.begin(); i != elements_.end(); i++) {
+        std::cout << "[" << i->first << "] ";
+
+        i->second->print();
+    }
+}
+
 

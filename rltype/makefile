@@ -1,8 +1,8 @@
 CC=g++
 
-CCPARAMS=-DRLINTERP_DEBUG -ggdb
+CCPARAMS=-ggdb
 
-LIBNAME=rltypes
+LIBNAME=rltype
 LIBFILE=lib$(LIBNAME).a
 
 all: comp_release compose
