@@ -37,8 +37,8 @@ public:
 
 	virtual RLType* copy() const;
 
-    virtual RLType applyUnary(RLOperator);
-    virtual RLType applyBinary(RLOperator, RLType*);
+    virtual RLType* applyUnary(RLOperator);
+    virtual RLType* applyBinary(RLOperator, RLType*);
 
     RLTypeQualifier getTypeQualifier() const;
 
@@ -60,8 +60,8 @@ public:
 	bool getValue() const;
 	void setValue(bool val);
 
-    virtual RLType applyUnary(RLOperator oper);
-    virtual RLType applyBinary(RLOperator oper, RLType* val);
+    virtual RLType* applyUnary(RLOperator oper);
+    virtual RLType* applyBinary(RLOperator oper, RLType* val);
 
     virtual void print();
 
@@ -82,8 +82,8 @@ public:
 	int getValue() const;
 	void setValue(int val);
 
-    virtual RLType applyUnary(RLOperator oper);
-    virtual RLType applyBinary(RLOperator oper, RLType* val);
+    virtual RLType* applyUnary(RLOperator oper);
+    virtual RLType* applyBinary(RLOperator oper, RLType* val);
 
     virtual void print();
 
@@ -109,8 +109,8 @@ public:
 
     RLTypeQualifier getElemQualifier() const;
 
-    virtual RLType applyUnary(RLOperator oper);
-    virtual RLType applyBinary(RLOperator oper, RLType* val);
+    virtual RLType* applyUnary(RLOperator oper);
+    virtual RLType* applyBinary(RLOperator oper, RLType* val);
 
     virtual void print();
 

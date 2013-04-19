@@ -46,18 +46,18 @@ RLType* RLType::copy() const {
 	return new RLType();
 }
 
-RLType RLType::applyUnary(RLOperator) {
+RLType* RLType::applyUnary(RLOperator) {
 	// ERROR! Can't apply any operator for base RLType
     std::cout << "ERROR: Can't apply any operator for base RLType.\n";
 
-    return RLBool(false);
+    return new RLBool(false);
 }
 
-RLType RLType::applyBinary(RLOperator, RLType*) {
+RLType* RLType::applyBinary(RLOperator, RLType*) {
 	// ERROR! Can't apply any operator for base RLType
     std::cout << "ERROR: Can't apply any operator for base RLType.\n";
 
-    return RLBool(false);
+    return new RLBool(false);
 }
 
 void RLType::print() {
@@ -119,21 +119,21 @@ void RLBool::setValue(bool val) {
 	value_ = val;
 }
 
-RLType RLBool::applyUnary(RLOperator oper) {
+RLType* RLBool::applyUnary(RLOperator oper) {
 	// ERROR! Not one unary operators not exist for RLBool
     std::cout << "ERROR: Not one unary operators not exist for RLBool.\n";
 
 }
 
-RLType RLBool::applyBinary(RLOperator oper, RLType* val) {
+RLType* RLBool::applyBinary(RLOperator oper, RLType* val) {
 	switch(oper) {
 	case compare:
 		if(val->getTypeQualifier()==Bool) {
 			RLBool* valb = (RLBool*)val;
-            return RLBool(getValue() == valb->getValue());
+            return new RLBool(getValue() == valb->getValue());
 		} else if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
-            return RLBool(getValue() == (bool)valn->getValue());
+            return new RLBool(getValue() == (bool)valn->getValue());
 		} else {
 			// Can't compare RLBool with val->getTypeQualifier()
             std::cout << "ERROR: Can't compare RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
@@ -144,17 +144,17 @@ RLType RLBool::applyBinary(RLOperator oper, RLType* val) {
 		if(val->getTypeQualifier()==Bool) {
 			RLBool* valb = (RLBool*)val;
 			setValue(valb->getValue());
-            return RLBool(true);
+            return new RLBool(true);
 		} else {
 			// Can't assign RLBool with val->getTypeQualifier()
             std::cout << "ERROR: Can't assign RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
-            return RLBool(false);
+            return new RLBool(false);
 		}
 	break;
 	default:
         // Unexpected binary operator for RLBool
         std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
-        return RLBool(false);
+        return new RLBool(false);
 	break;
     }
 }
@@ -190,7 +190,7 @@ void RLNumber::setValue(int val) {
 	value_ = val;
 }
 
-RLType RLNumber::applyUnary(RLOperator oper) {
+RLType* RLNumber::applyUnary(RLOperator oper) {
 	switch(oper) {
 	case increment:
 		value_++;
@@ -201,41 +201,42 @@ RLType RLNumber::applyUnary(RLOperator oper) {
 	default:
 		// Unexpected unary operator for RLNumb
 		std::cout << "ERROR: Unexpected unary operator for RLNumb.\n";
-        return RLBool(false);
+
+        return new RLBool(false);
 	break;
     }
-    return RLBool(true);
+    return new RLBool(true);
 }
 
-RLType RLNumber::applyBinary(RLOperator oper, RLType* val) {
+RLType* RLNumber::applyBinary(RLOperator oper, RLType* val) {
     switch(oper) {
 	case compare:
 		if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
-            return RLBool(getValue() == valn->getValue());
+            return new RLBool(getValue() == valn->getValue());
 		} else {
 			// Can't compare RLNumb with val->getTypeQualifier()
             std::cout << "ERROR: Can't compare RLNumb with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
 
-            return RLBool(false);
+            return new RLBool(false);
 		}
 	break;
 	case assign:
 		if(val->getTypeQualifier()==Number) {
 			RLNumber* valn = (RLNumber*)val;
 			setValue(valn->getValue());			
-            return RLBool(true);
+            return new RLBool(true);
 		} else {
 			// Can't assign RLNumb with val->getTypeQualifier()
             std::cout << "ERROR: Can't assign RLNumb with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
 
-            return RLBool(false);
+            return new RLBool(false);
 		}
 	break;
 	default:
         // Unexpected binary operator for RLBool
         std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
-        return RLBool(false);
+        return new RLBool(false);
 	break;
     }
 }
@@ -300,14 +301,14 @@ RLType::RLTypeQualifier RLArray::getElemQualifier() const {
     return arrayType_;
 }
 
-RLType RLArray::applyUnary(RLOperator oper) {
+RLType* RLArray::applyUnary(RLOperator oper) {
     // ERROR! Not one unary operators not exist for RLArray
     std::cout << "ERROR: Not one unary operators not exist for RLArray.\n";
 
-    return RLBool(false);
+    return new RLBool(false);
 }
 
-RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
+RLType* RLArray::applyBinary(RLOperator oper, RLType *val) {
     switch(oper) {
     case compare:
         if(val->getTypeQualifier()==Array) {
@@ -315,7 +316,7 @@ RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
 
             if(vala->getElemQualifier() != getElemQualifier()) {
                 // Different elements types
-                return RLBool(false);
+                return new RLBool(false);
             }
 
             if(elements_.size()!=vala->elements_.size()) {
@@ -327,15 +328,17 @@ RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
             RLArrayStorage::const_iterator i2 = vala->elements_.begin();
 
             for(; i1 != elements_.end(); i1++, i2++) {
-                RLType res = i1->second->applyBinary(compare,i2->second).getValue();
-                if(res.getTypeQualifier()==Bool)
+                RLType* res = i1->second->applyBinary(compare,i2->second);
 
-                if() {
-                    return RLBool(false);
+                if(res->getTypeQualifier() == Bool) {
+                    RLBool* resb = (RLBool*)res;
+                    if(!resb->getValue()) {
+                        return new RLBool(false);
+                    }
                 }
             }
 
-            return RLBool(true);
+            return new RLBool(true);
         } else {
             // Can't compare RLArray with val->getTypeQualifier()
             std::cout << "ERROR: Can't compare RLArray with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
@@ -348,32 +351,34 @@ RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
 
             if(vala->getElemQualifier() != getElemQualifier()) {
                 // Different elements types
-                return RLBool(false);
+                return new RLBool(false);
             }
 
             RLArrayStorage::const_iterator i;
 
             for(i = vala->elements_.begin(); i != vala->elements_.end(); i++) {
-                if(!i->second->applyBinary(compare,i->second)) {
-                    elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
-                }
+                elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
             }
 
-            return RLBool(true);
+            return this;
         } else {
             // Can't assign RLArray with val->getTypeQualifier()
             std::cout << "ERROR: Can't assign RLBool with " << RLType::typeName(val->getTypeQualifier()) << ".\n";
 
-            return RLBool(false);
+            return new RLBool(false);
         }
     break;
     case arrayat:
         if(val->getTypeQualifier()==Number) {
             RLNumber* valn = (RLNumber*)val;
 
+            RLType* res = getElem(valn->getValue());
 
-
-            return RLBool(true);
+            if(res != NULL) {
+                return res;
+            } else {
+                return new RLBool(false);
+            }
         } else {
             // Only RLNumber can be used in[]
             std::cout << "ERROR: Only RLNumber can be used in[].\n";
@@ -383,7 +388,7 @@ RLType RLArray::applyBinary(RLOperator oper, RLType *val) {
         // Unexpected binary operator for RLArray
         std::cout << "ERROR: Unexpected binary operator for RLArray.\n";
 
-        return RLBool(false);
+        return new RLBool(false);
     break;
     }
 }
