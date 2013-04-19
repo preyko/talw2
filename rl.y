@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-//#define YYSTYPE char*
+#include "rltype/RLType.h"
+
+//#define YYSTYPE RLType*
 
 
 int yydebug = 1;
@@ -51,10 +53,6 @@ body:
 
 command:
 	operators SEMICOLON
-//	|
-//	OFBRACE command EFBRACE {
-//		printf("One entry in bracers\n");
-//	}
 	;
 
 const:
@@ -85,19 +83,19 @@ operators:
 	
 returnable_operators:
 	ident ASSIGOPER const {
-		printf("Ident %d = %d\n",$1,$3);
+                //printf("Ident %d = %d\n",$1,$3);
 	}
 	|
 	ident EQOPER const {
-		printf("Ident %d == %d\n",$1,$3);
+                //printf("Ident %d == %d\n",$1,$3);
 	}
 	|
 	ident DECOPER {
-		printf("Ident %d decrement\n",$1);
+                //printf("Ident %d decrement\n",$1);
 	}
 	|
 	ident INCOPER {
-		printf("Ident %d increment\n",$1);
+                //printf("Ident %d increment\n",$1);
 	}
 	;
 
