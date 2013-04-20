@@ -10,14 +10,14 @@ class RLType;
 typedef std::map<int,RLType*> IdentifierRegister;
 typedef std::pair<int,RLType*> IdentifierRegisterPair;
 
-class RLIdentifierRegister {
+class RLIdentRegister {
 public:
-	bool add(int id, RLType* identifier);
+    static bool add(int id, RLType* identifier);
 
-	RLType* get(int id);
+    static RLType* get(int id);
 
 private:
-	IdentifierRegister register_;
+    static IdentifierRegister register_;
 };
 
 class RLType {
@@ -28,7 +28,6 @@ public:
 		RLTypeQualifier typeName;	
 	};
 
-    static void setRegister(RLIdentifierRegister* iregister);
     static std::string typeName(RLTypeQualifier qualifier);
 
 	RLType();
@@ -45,9 +44,7 @@ public:
     virtual void print();
 
 protected:
-	RLTypeMeta meta_;
-
-	static RLIdentifierRegister* iregister_;
+    RLTypeMeta meta_;
 };
 
 class RLBool : public RLType {
@@ -121,3 +118,6 @@ protected:
 private:
     void init_(RLTypeQualifier qualifier);
 };
+
+template<class T>
+T RLcast(RLType* type);

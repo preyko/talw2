@@ -1,36 +1,41 @@
 %{
 #include <stdio.h>
+
 #include "rl.hh"
+
+FILE* token_output;
+
 %}
 
-%%
-test			return TEST;
 
+%%
 	/* Constants */
-T|F			if(yytext[0]=='T') yylval=1; else yylval=0; return BOOLCONST;
-[1-9][0-9]+		yylval=atoi(yytext); return NUMBCONST;
-\-[1-9][0-9]+		yylval=atoi(&yytext[1]); return NUMBCONST;
+T|F			fprintf(token_output,"BOOLCONST"); if(yytext[0]=='T') yylval=1; else yylval=0; return BOOLCONST;
+[1-9][0-9]+		fprintf(token_output,"NUMBCONST"); yylval=atoi(yytext); return NUMBCONST;
+\-[1-9][0-9]+		fprintf(token_output,"NUMBCONST"); yylval=atoi(&yytext[1]); return NUMBCONST;
 
 	/* Variable identifier */
-,[0-9]+			printf("BOOLIDNT"); yylval=atoi(&yytext[1]); return BOOLIDNT;
-.[0-9]+			printf("NUMBIDNT"); yylval=atoi(&yytext[1]); return NUMBIDNT;
+,[0-9]+			fprintf(token_output,"BOOLIDNT"); yylval=atoi(&yytext[1]); return BOOLIDNT;
+.[0-9]+			fprintf(token_output,"NUMBIDNT"); yylval=atoi(&yytext[1]); return NUMBIDNT;
 
 	/* Operators */
-\<\-			printf("ASSIGOPER"); return ASSIGOPER;
-eq			printf("ASSIGOPER"); return EQOPER;
+\<\-			fprintf(token_output,"ASSIGOPER"); return ASSIGOPER;
+eq			fprintf(token_output,"EQOPER"); return EQOPER;
 
-\-\-			printf("INCOPER"); return INCOPER;
-\+\+			printf("DECOPER"); return DECOPER;
+\-\-			fprintf(token_output,"INCOPER"); return INCOPER;
+\+\+			fprintf(token_output,"DECOPER"); return DECOPER;
+
+print_			fprintf(token_output,"PRINTOPER"); return PRINTOPER;
 
 
 
 	/* DELIMETRS */
-\{                      printf("OFBRACE"); return OFBRACE;
-\}                      printf("EFBRACE"); return EFBRACE;
-\(                      printf("OBRACE"); return OBRACE;
-\)                      printf("EBRACE"); return EBRACE;
-;                       printf("SEMICOLON"); return SEMICOLON;
+\{                      fprintf(token_output,"OFBRACE"); return OFBRACE;
+\}                      fprintf(token_output,"EFBRACE"); return EFBRACE;
+\(                      fprintf(token_output,"OBRACE"); return OBRACE;
+\)                      fprintf(token_output,"EBRACE"); return EBRACE;
+;                       fprintf(token_output,"SEMICOLON"); return SEMICOLON;
 
-\n                      printf("");/* пропускаем концы строк */;
-[ \t]+                  printf("");/* пропускаем пробелы */;
+\n                      fprintf(token_output,"");/* пропускаем концы строк */;
+[ \t]+                  fprintf(token_output,"");/* пропускаем пробелы */;
 %%

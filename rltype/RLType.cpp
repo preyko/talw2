@@ -4,7 +4,7 @@
 /*
  * class RLIdentifierRegister
  */
-bool RLIdentifierRegister::add(int id, RLType* identifier) {
+bool RLIdentRegister::add(int id, RLType* identifier) {
 	if(register_.find(id) == register_.end()) {
 		register_.insert(IdentifierRegisterPair(id,identifier));
 		
@@ -12,34 +12,29 @@ bool RLIdentifierRegister::add(int id, RLType* identifier) {
 	} else {
 		// Bring an ERROR:
 		// ID collision.
-		std::cout << "ERROR: ID collision.\n";
+        std::cout << "ERROR: ID collision. Id " << id << " exist.\n";
 
 		return false;
 	}
 }
 
-RLType* RLIdentifierRegister::get(int id) {
-	return register_.find(id)->second;
+RLType* RLIdentRegister::get(int id) {
+    IdentifierRegister::iterator it = register_.find(id);
+    return it->second;
 }
+
+IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
 
 
 /*
  * class RLType
  */
-RLIdentifierRegister* RLType::iregister_ = NULL; // Definition of static class member
 
 RLType::RLType() {
-	
 }
 
 bool RLType::reg(int id) {
-    if(iregister_==NULL) {
-        // ERROR! Register of identifier has not been declared,\n\tso use static method RLType::setRegister(RLIdentifierRegister*)
-        std::cout << "ERROR: Register of identifier has not been declared,\n\tso use static method RLType::setRegister(RLIdentifierRegister*)\n";
-
-        return false;
-    }
-	return iregister_->add(id,this);
+    RLIdentRegister::add(id,this);
 }
 
 RLType* RLType::copy() const {
@@ -62,10 +57,6 @@ RLType* RLType::applyBinary(RLOperator, RLType*) {
 
 void RLType::print() {
     std::cout << "RLType = Base." << std::endl;
-}
-
-void RLType::setRegister(RLIdentifierRegister* iregister) {
-    iregister_ = iregister;
 }
 
 RLType::RLTypeQualifier RLType::getTypeQualifier() const {

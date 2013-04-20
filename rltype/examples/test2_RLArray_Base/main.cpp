@@ -2,7 +2,7 @@
 #include "RLType.h"
 
 int main() {
-	RLIdentifierRegister* iregister = new RLIdentifierRegister();
+	RLIdentRegister* iregister = new RLIdentRegister();
     RLType::setRegister(iregister);
 
     std::cout << "Test 1\n";
