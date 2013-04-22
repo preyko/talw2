@@ -162,6 +162,8 @@ public:
 
     void setLinePointer(int nline);
 
+    void exec();
+
     virtual RLTypePrototype* applyUnary(RLOperator oper);
     virtual RLTypePrototype* applyBinary(RLOperator oper, RLTypePrototype* val);
 

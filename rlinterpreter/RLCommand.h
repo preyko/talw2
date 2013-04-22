@@ -51,7 +51,7 @@ public:
     virtual void print() const;
 
 protected:
-    virtual RLTypePrototype* exec_();
+    virtual RLTypePrototype* exec_() const;
 
 private:
     RLCommandPrototype* first_;
@@ -63,6 +63,7 @@ private:
     void init_(RLOperator oper, RLCommandPrototype* f, RLCommandPrototype* s);
 };
 
+/*
 class RLConditional : public RLCommandPrototype {
 public:
     RLConditional(RLTypePrototype* effectcode, RLProcedure* condition);
@@ -82,4 +83,4 @@ protected:
     RLProcedure* effect_;
 
 };
-
+*/

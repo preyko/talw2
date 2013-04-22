@@ -49,7 +49,7 @@ RLCommand::RLCommand(RLOperator oper, RLTypePrototype* f, RLTypePrototype* s) {
 }
 
 RLCommand::RLCommand(RLOperator oper, int idf, int ids) {
-    init_(oper,f,s);
+    init_(oper,idf,ids);
 }
 
 RLCommand::~RLCommand() {
@@ -81,9 +81,13 @@ RLTypePrototype* RLCommand::exec() const {
     return exec_();
 }
 
-RLTypePrototype* RLCommand::exec_() {
+void RLCommand::print() const {
+
+}
+
+RLTypePrototype* RLCommand::exec_() const {
     if(first_==NULL && second_==NULL) {
-        return RLBool(false);
+        return new RLBool(false);
     } else if(first_!=NULL && second_==NULL) {
         return first_->exec()->applyUnary(operator_);
     } else {
@@ -94,8 +98,8 @@ RLTypePrototype* RLCommand::exec_() {
 
 /*
  * class RLConditional : public RLCommandBase
- */
+ */ /*
 RLConditional::RLConditional(RLTypePrototype* effectcode, RLProcedure* condition) {
-}
+} */
 
 

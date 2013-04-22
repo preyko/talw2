@@ -505,6 +505,10 @@ void RLProcedure::addCommand(RLCommandPrototype* c) {
     chain_.push_back(c);
 }
 
+void RLProcedure::setLinePointer(int nline) {
+    currentLinePointer_ = nline;
+}
+
 void RLProcedure::exec_() {
     for(int i = 0; i < chain_.size(); i++) {
         (RLCommandPrototype*)(chain_.at(i))->exec();
@@ -567,3 +571,7 @@ void RLProcedure::printCommand(int line) {
         chain_.at(line)->print();
 }
 
+
+void RLProcedure::exec() {
+    exec_();
+}
