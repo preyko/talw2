@@ -73,7 +73,7 @@ const:
 
 ident:
 	BOOLIDNT {
-		RLType* tmp = RLIdentRegister::get((int)$1);
+		RLTypePrototype* tmp = RLIdentRegister::get((int)$1);
 		if(tmp == NULL)
 			tmp = new RLBool(false,(int)$1);
 		else if(tmp->getTypeQualifier() != RLType::Bool) {
@@ -85,7 +85,7 @@ ident:
 	}
 	|
 	NUMBIDNT {
-		RLType* tmp = RLIdentRegister::get((int)$1);
+		RLTypePrototype* tmp = RLIdentRegister::get((int)$1);
 		if(tmp == NULL)
 			tmp = new RLNumber(0,(int)$1);
 		else if(tmp->getTypeQualifier() != RLType::Number) {
@@ -105,8 +105,8 @@ operators:
 	
 returnable_operators:
 	ident ASSIGOPER const {
-                RLType* ident = (RLType*) $1;
-		$$=(void*)ident->applyBinary(assign,(RLType*)$3);
+                RLTypePrototype* ident = (RLTypePrototype*) $1;
+		$$=(void*)ident->applyBinary(assign,(RLTypePrototype*)$3);
 	}
 	|
 	ident EQOPER const {
