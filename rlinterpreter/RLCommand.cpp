@@ -158,7 +158,7 @@ RLTypePrototype* RLCycle::exec() const {
     while(isAccept_()) {
         exec_();
 
-        if(i++ < MaxCycleIteration_) {
+        if(i++ > MaxCycleIteration_) {
             return new RLBool(false);
         }
     }

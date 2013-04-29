@@ -15,3 +15,5 @@ tests.txt
 rlinterpreter/examples/test4_Command/main.cpp
 rlinterpreter/RLInterpreter.h
 rlinterpreter/RLInterpreter.cpp
+RLPrecompiler/precompiler.y
+RLPrecompiler/tokenizer.l
