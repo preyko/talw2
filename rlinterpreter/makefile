@@ -12,14 +12,16 @@ debug: comp_debug compose
 
 comp_debug: RLType.* RLCommand.*
 	$(CC) $(CCFLAGS) -c RLType.cpp -o RLType.o
+	$(CC) $(CCFLAGS) -c RLInterpreter.cpp -o RLInterpreter.o
 	$(CC) $(CCFLAGS) -c RLCommand.cpp -o RLCommand.o
 
 comp_release: RLType.* RLCommand.*
 	$(CC) -c RLType.cpp -o RLType.o
+	$(CC) -c RLInterpreter.cpp -o RLInterpreter.o
 	$(CC) -c RLCommand.cpp -o RLCommand.o
 
 compose: RLCommand.o RLType.o
-	ar rc $(LIBFILE) RLCommand.o RLType.o
+	ar rc $(LIBFILE) RLCommand.o RLType.o RLInterpreter.o
 
 clear:
-	rm $(LIBFILE) RLCommand.o RLType.o
+	rm $(LIBFILE) RLCommand.o RLType.o RLInterpreter.o

@@ -63,24 +63,42 @@ private:
     void init_(RLOperator oper, RLCommandPrototype* f, RLCommandPrototype* s);
 };
 
-/*
+
 class RLConditional : public RLCommandPrototype {
 public:
-    RLConditional(RLTypePrototype* effectcode, RLProcedure* condition);
+    RLConditional(RLTypePrototype* effectcode, RLCommandPrototype* condition);
     ~RLConditional();
 
     virtual RLCommandPrototype* copy() const;
 
-    virtual RLTypePrototype* exec();
+    virtual RLTypePrototype* exec() const;
 
-    virtual void print();
+    virtual void print() const;
 
 protected:
-    void exec_();
-    bool isAccept_();
+    void exec_() const;
+    bool isAccept_() const;
 
     RLCommandPrototype* condition_;
     RLProcedure* effect_;
 
+private:
+    RLTypePrototype* Truth_;
+    RLCommandPrototype* TestOfFaith_;
+
 };
-*/
+
+class RLCycle : public RLConditional {
+public:
+    RLCycle(RLTypePrototype* effectcode, RLCommandPrototype* condition);
+
+    virtual RLCommandPrototype* copy() const;
+
+    virtual RLTypePrototype* exec() const;
+
+    virtual void print() const;
+
+private:
+    static const int MaxCycleIteration_ = 250;
+
+};

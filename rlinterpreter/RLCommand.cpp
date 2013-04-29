@@ -98,8 +98,78 @@ RLTypePrototype* RLCommand::exec_() const {
 
 /*
  * class RLConditional : public RLCommandBase
- */ /*
-RLConditional::RLConditional(RLTypePrototype* effectcode, RLProcedure* condition) {
-} */
+ */
+RLConditional::RLConditional(RLTypePrototype* effectcode, RLCommandPrototype* condition) {
+    Truth_ = new RLBool(true);
 
+    condition_ = new RLCommand(compare,condition,new RLDereference(Truth_));
 
+    if(effectcode->getTypeQualifier() == RLTypePrototype::Procedure) {
+        effect_ = (RLProcedure*) effectcode;
+    } else {
+        std::cout << "ERROR: Only RLProcedure accepted as RLConditional & RLCycle command effect code.\n";
+    }
+}
+
+RLConditional::~RLConditional() {
+    delete condition_;
+}
+
+RLCommandPrototype* RLConditional::copy() const {
+    return new RLConditional(effect_->copy(),condition_->copy());
+}
+
+RLTypePrototype* RLConditional::exec() const {
+    bool accept = isAccept_();
+
+    if(accept)
+        exec_();
+
+    return new RLBool(accept);
+}
+
+void RLConditional::print() const {
+
+}
+
+bool RLConditional::isAccept_() const {
+    RLTypePrototype* res = condition_->exec();
+
+    if(res->getTypeQualifier() == RLTypePrototype::Bool)
+        return ((RLBool*)res)->getValue();
+    else
+        std::cout << "Unexpected comparsion error. Try to inspect your \'compare\' block in RLTypePrototype::applyBinary().\n";
+}
+
+void RLConditional::exec_() const {
+    effect_->exec();
+}
+
+/*
+ * class RLCycle : public RLConditional
+ */
+RLCycle::RLCycle(RLTypePrototype* effectcode, RLCommandPrototype* condition)
+    : RLConditional(effectcode,condition) {
+}
+
+RLTypePrototype* RLCycle::exec() const {
+    int i = 0;
+
+    while(isAccept_()) {
+        exec_();
+
+        if(i++ < MaxCycleIteration_) {
+            return new RLBool(false);
+        }
+    }
+
+    return new RLBool(true);
+}
+
+RLCommandPrototype* RLCycle::copy() const {
+    return new RLCycle(effect_,condition_);
+}
+
+void RLCycle::print() const {
+
+}

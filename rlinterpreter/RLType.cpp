@@ -399,6 +399,8 @@ RLMark::RLMark(RLTypePrototype* owner, int line, int id) {
 }
 
 void RLMark::init_(RLTypePrototype* owner, int line) {
+    meta_.typeName = Mark;
+
     std::cout << "RLMark in development, it will come later.\n";
 
     if(owner->getTypeQualifier() != Procedure) {
@@ -472,6 +474,8 @@ RLProcedure::RLProcedure(int id) {
 }
 
 void RLProcedure::init_() {
+    meta_.typeName = Procedure;
+
     currentLinePointer_ = 0;
 }
 
