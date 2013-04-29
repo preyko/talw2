@@ -41,11 +41,17 @@ RLTypePrototype* RLTypePrototype::copy() const {
     return new RLTypePrototype();
 }
 
-RLTypePrototype* RLTypePrototype::applyUnary(RLOperator) {
-	// ERROR! Can't apply any operator for base RLType
-    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
+RLTypePrototype* RLTypePrototype::applyUnary(RLOperator oper) {
+    switch(oper) {
+        case show:
+            print();
 
-    return new RLBool(false);
+            return NULL;
+        break;
+        default:
+            return this;
+        break;
+    }
 }
 
 RLTypePrototype* RLTypePrototype::applyBinary(RLOperator, RLTypePrototype*) {
@@ -111,8 +117,7 @@ void RLBool::setValue(bool val) {
 }
 
 RLTypePrototype* RLBool::applyUnary(RLOperator oper) {
-	// ERROR! Not one unary operators not exist for RLBool
-    std::cout << "ERROR: Not one unary operators not exist for RLBool.\n";
+    RLTypePrototype::applyUnary(oper);
 
     return this;
 }
@@ -181,17 +186,19 @@ void RLNumber::setValue(int val) {
 }
 
 RLTypePrototype* RLNumber::applyUnary(RLOperator oper) {
-	switch(oper) {
-	case increment:
-		value_++;
-	break;
-	case decrement:
-		value_--;
-	break;
-	default:
-		// Unexpected unary operator for RLNumb
-        std::cout << "ERROR: Unexpected unary operator for RLNumb.\n";
-	break;
+    if(RLTypePrototype::applyUnary(oper) == NULL) {
+        switch(oper) {
+        case increment:
+            value_++;
+        break;
+        case decrement:
+            value_--;
+        break;
+        default:
+            // Unexpected unary operator for RLNumb
+            std::cout << "ERROR: Unexpected unary operator for RLNumb.\n";
+        break;
+        }
     }
 
     return this;
@@ -289,10 +296,7 @@ RLTypePrototype::RLTypeQualifier RLArray::getElemQualifier() const {
 }
 
 RLTypePrototype* RLArray::applyUnary(RLOperator oper) {
-    // ERROR! Not one unary operators not exist for RLArray
-    std::cout << "ERROR: Not one unary operators not exist for RLArray.\n";
-
-    return new RLBool(false);
+    RLTypePrototype::applyUnary(oper);
 }
 
 RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
@@ -425,20 +429,22 @@ void RLMark::setLinePointer(int nline) {
 }
 
 RLTypePrototype* RLMark::applyUnary(RLOperator oper) {
-    switch(oper) {
-        case maketransition:
-            if(owner_!=NULL) {
-                owner_->setLinePointer(linePointer_);
-                return new RLBool(true);
-            } else {
-                // RLMark transaction cannot be performed because procedure Owner is not declared.
-                std::cout << "ERROR: RLMark transaction cannot be performed because procedure Owner is not declared.\n";
-            }
-        break;
-        default:
-            // Can't perform not \'makeTransition\' operation for RLMark
-            std::cout << "ERROR: Can't perform not \'makeTransition\' operation for RLMark\n";
-        break;
+    if(RLTypePrototype::applyUnary(oper) == NULL) {
+        switch(oper) {
+            case maketransition:
+                if(owner_!=NULL) {
+                    owner_->setLinePointer(linePointer_);
+                    return new RLBool(true);
+                } else {
+                    // RLMark transaction cannot be performed because procedure Owner is not declared.
+                    std::cout << "ERROR: RLMark transaction cannot be performed because procedure Owner is not declared.\n";
+                }
+            break;
+            default:
+                // Can't perform not \'makeTransition\' operation for RLMark
+                std::cout << "ERROR: Can't perform not \'makeTransition\' operation for RLMark\n";
+            break;
+        }
     }
 
     return new RLBool(false);
@@ -520,14 +526,16 @@ void RLProcedure::exec_() {
 }
 
 RLTypePrototype* RLProcedure::applyUnary(RLOperator oper) {
-    switch(oper) {
-        case perform:
-            exec_();
-        break;
-        default:
-            // Can't perform not \'perform\' operation for RLProcedure
-            std::cout << "ERROR: Can't perform not \'perform\' operation for RLProcedure";
-        break;
+    if(RLTypePrototype::applyUnary(oper) == NULL) {
+        switch(oper) {
+            case perform:
+                exec_();
+            break;
+            default:
+                // Can't perform not \'perform\' operation for RLProcedure
+                std::cout << "ERROR: Can't perform not \'perform\' operation for RLProcedure";
+            break;
+        }
     }
 
     return this;

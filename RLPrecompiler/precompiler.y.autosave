@@ -28,9 +28,6 @@ int yywrap() {
         return 1;
 }
 
-
-/****** PRECOMPILLER HEAD ******/
-
 int main(int argn,const char** arg) {
     if(argn == 2) {
         yyin = fopen(arg[1],"r");
