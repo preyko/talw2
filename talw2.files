@@ -17,3 +17,6 @@ rlinterpreter/RLInterpreter.h
 rlinterpreter/RLInterpreter.cpp
 RLPrecompiler/precompiler.y
 RLPrecompiler/tokenizer.l
+RLPrecompiler/token_reader.l
+RLPrecompiler/RLTokenizer.h
+RLPrecompiler/RLPrecompiler.h

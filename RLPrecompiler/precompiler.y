@@ -1,24 +1,24 @@
 %{
-#include <iostream>
+enum RLTokenValueType {
+    BoolC, NumbC,
+    BoolI, NumbI, ProcI, MarkI,
+};
 
-#include <stdio.h>
-#include <string.h>
+struct RLTokenValue {
+    int val;
+    RLTokenValueType type;
+};
 
-
-#define YYSTYPE void*
+#define YYSTYPE RLTokenValue
 
 int yydebug = 1;
 
 extern FILE* yyin;
-extern FILE* token_output;
+extern int yyparse(void);
+extern int yywrap(void);
+extern int yylex(void);
 
-extern "C" {
-        int yyparse(void);
-        int yywrap(void);
-        int yylex(void);
-
-        int main(int,const char**);
-}
+extern int main(int,const char**);
 
 void yyerror(const char* str) {
         fprintf(stderr,"Error: %s\n",str);
@@ -28,13 +28,9 @@ int yywrap() {
         return 1;
 }
 
-
-/****** PRECOMPILLER HEAD ******/
-
 int main(int argn,const char** arg) {
     if(argn == 2) {
         yyin = fopen(arg[1],"r");
-        token_output = fopen("tokeno.txt","r");
     }
 
     do {
@@ -46,64 +42,43 @@ int main(int argn,const char** arg) {
 
 %}
 
-%start body
-%token OBRACE EBRACE OFBRACE EFBRACE SEMICOLON TEST // DELIMETRS
-BOOLIDNT NUMBIDNT // IDENTIFIER
-BOOLCONST NUMBCONST // CONSTANT
-ASSIGOPER EQOPER INCOPER DECOPER // OPERATORS
-PRINTOPER
+%start procedure
+%token OBRACE EBRACE OFBRACE EFBRACE SEMICOLON // DELIMETRS
+BOOLI NUMBI // IDENTIFIER
+BOOLC NUMBC // CONSTANT
+ASSIGN COMPARE INC DEC // OPERATORS
+PRINT
 
 
 %%
-body:
-        |
-        body command
-        ;
+procedure:
+    |
+    procedure line
+    ;
+
+line:
+    command SEMICOLON
+    ;
 
 command:
-        operators SEMICOLON
-        ;
+    returnable
+    |
+    nonreturnable
+    ;
 
-const:
-        BOOLCONST {
-        }
-        |
-        NUMBCONST {
-        }
-        ;
+nonreturnable:
+    PRINT
+    ;
+
+returnable:
+    ident ASSIGN returnable {
+    }
+    |
+    returnable COMPARE returnable {
+    }
+    |
 
 ident:
-        BOOLIDNT {
-        }
-        |
-        NUMBIDNT {
-        }
-        ;
+    BOOLI
+    ;
 
-operators:
-        returnable_operators
-        |
-        nonreturnable_operators
-        ;
-
-returnable_operators:
-        ident ASSIGOPER const {
-        }
-        |
-        ident EQOPER const {
-        }
-        |
-        ident DECOPER {
-        }
-        |
-        ident INCOPER {
-        }
-        |
-        ident {
-        }
-        ;
-
-nonreturnable_operators:
-        PRINTOPER returnable_operators {
-        }
-        ;
