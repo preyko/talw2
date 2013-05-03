@@ -1,41 +1,99 @@
-%{
+%option noyywrap
+
+%top{
 #include <stdio.h>
 
-#include "precompiler.hh"
+#include "RLTokenizer.h"
 
-FILE* token_output;
+// This just make namespaces invisible for Flex
+#define RLNAMESPACE_BEGIN namespace RLTokenizer {
+#define RLNAMESPACE_END }
 
-%}
-
-
+RLNAMESPACE_BEGIN
+}
 %%
 	/* Constants */
-T|F			fprintf(token_output,"BOOLCONST"); if(yytext[0]=='T') yylval=1; else yylval=0; return BOOLCONST;
-[1-9][0-9]+		fprintf(token_output,"NUMBCONST"); yylval=atoi(yytext); return NUMBCONST;
-\-[1-9][0-9]+		fprintf(token_output,"NUMBCONST"); yylval=atoi(&yytext[1]); return NUMBCONST;
+T|F                     fprintf(token_output,"BOOLC,val=%s ",yytext);
+[1-9][0-9]+             fprintf(token_output,"NUMBC,val=%s ",yytext);
+\-[1-9][0-9]+           fprintf(token_output,"NUMBC,val=%s ",yytext);
 
 	/* Variable identifier */
-,[0-9]+			fprintf(token_output,"BOOLIDNT"); yylval=atoi(&yytext[1]); return BOOLIDNT;
-.[0-9]+			fprintf(token_output,"NUMBIDNT"); yylval=atoi(&yytext[1]); return NUMBIDNT;
+\~[0-9]+                fprintf(token_output,"MARKI,id=%s ",&yytext[1]);
+\$[0-9]+                fprintf(token_output,"PROCI,id=%s ",&yytext[1]);
+,[0-9]+                 fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
+.[0-9]+                 fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
 
 	/* Operators */
-\<\-			fprintf(token_output,"ASSIGOPER"); return ASSIGOPER;
-eq			fprintf(token_output,"EQOPER"); return EQOPER;
+\<\-                    fprintf(token_output,"ASSIGN ");
+eq                      fprintf(token_output,"COMPARE ");
 
-\-\-			fprintf(token_output,"INCOPER"); return INCOPER;
-\+\+			fprintf(token_output,"DECOPER"); return DECOPER;
+\,\#[0-9]+              fprintf(token_output,"NUMBI,id=%s INC ",&yytext[2]);
+\,\*[0-9]+              fprintf(token_output,"NUMBI,id=%s DEC ",&yytext[2]);
 
-print_			fprintf(token_output,"PRINTOPER"); return PRINTOPER;
+\.\#[0-9]+              fprintf(token_output,"BOOLI,id=%s NOR ",&yytext[2]);
+
+please                  fprintf(token_output,"PLEASE ");
+
+\@                      fprintf(token_output,"LINK ");
+\%                      fprintf(token_output,"RLINK ");
+
+print                   fprintf(token_output,"PRINT ");
 
 
 
 	/* DELIMETRS */
-\{                      fprintf(token_output,"OFBRACE"); return OFBRACE;
-\}                      fprintf(token_output,"EFBRACE"); return EFBRACE;
-\(                      fprintf(token_output,"OBRACE"); return OBRACE;
-\)                      fprintf(token_output,"EBRACE"); return EBRACE;
-;                       fprintf(token_output,"SEMICOLON"); return SEMICOLON;
+\{                      fprintf(token_output,"OFBRACE ");
+\}                      fprintf(token_output,"EFBRACE ");
+\[                      fprintf(token_output,"OSBRACE ");
+\]                      fprintf(token_output,"ESBRACE ");
+\(                      fprintf(token_output,"OBRACE ");
+\)                      fprintf(token_output,"EBRACE ");
+;                       fprintf(token_output,"SEMICOLON ");
 
-\n                      fprintf(token_output,"");/* пропускаем концы строк */;
-[ \t]+                  fprintf(token_output,"");/* пропускаем пробелы */;
+\n                      yylineno++; fprintf(token_output,"\n");
+[ \t]+                  fprintf(token_output," ");
+
+    /* ERRTOKEN */
+ .                      fprintf(token_output,"ERRTOKEN '%s' on line #%d. ",yytext,yylineno);
+
 %%
+RLNAMESPACE_END
+
+namespace RLTokenizer {
+    void Tokenize(FILE* input, FILE* output) {
+        yyin = input;
+        token_output = output;
+
+        yylex();
+    }
+}
+
+
+#ifdef MAIN
+int main(const int argn,const char** arg) {
+    FILE* in;
+    FILE* out;
+    if(argn >= 2) {
+        in = fopen(arg[1],"r");
+
+        if(in == NULL) {
+            fprintf(stderr,"ERROR: Can't open %s as RLCode file.\n",arg[1]);
+            return 1;
+        }
+    }
+    if(argn >= 3) {
+        out = fopen(arg[2],"w");
+
+        if(out == NULL) {
+            fprintf(stderr,"ERROR: Can't open %s for token out file.\n",arg[2]);
+            return 1;
+        }
+    } else {
+        out = fopen("token_output.txt","w");
+    }
+
+    RLTokenizer::Tokenize(in,out);
+
+    return 0;
+}
+#endif

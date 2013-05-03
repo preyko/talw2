@@ -1,0 +1,23 @@
+#!/bin/sh
+PREPEND=$1
+APPEND=$3
+TARGET=$2
+
+
+if [ "$1" = "-h" ]
+then
+	echo $0
+	echo "\t[prepend content] [target] [append conten]"
+else
+	if [ $# -eq 3 ]
+	then
+		cp $TARGET tmp
+		cat $PREPEND > $TARGET
+		cat tmp >> $TARGET
+		cat $APPEND >> $TARGET
+		rm tmp
+	else
+		echo "You should declare prepend/append contend and target file."
+	fi
+fi
+
