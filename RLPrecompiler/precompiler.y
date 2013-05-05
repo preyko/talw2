@@ -169,13 +169,13 @@ ident:
     |
     NUMBI {
         if(RLIdentRegister::get(atoi(&yytext[9]))==NULL)
-          $$ = new RLDereference(new RLNumber(0,atoi(&yytext[9])));
+            $$ = new RLDereference(new RLNumber(0,atoi(&yytext[9])));
         else {
-          RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
-          if(res->getTypeQualifier() != RLTypePrototype::Number)
-              throw "ERROR: Expected Bool!";
-          else
-              $$ = new RLDereference(res);
+            RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
+            if(res->getTypeQualifier() != RLTypePrototype::Number)
+                throw "ERROR: Expected Number!";
+            else
+                $$ = new RLDereference(res);
         }
         //$$->d = "id ";
         //$$->d += &yytext[9];

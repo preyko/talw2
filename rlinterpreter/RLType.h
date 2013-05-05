@@ -19,6 +19,8 @@ public:
 
     static RLTypePrototype* get(int id);
 
+    static void clear();
+
 private:
     static IdentifierRegister register_;
 };

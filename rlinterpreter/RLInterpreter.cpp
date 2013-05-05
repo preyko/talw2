@@ -4,6 +4,8 @@ RLProcedure* RLInterpreter::mainProc_ = NULL;
 RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFunctions();
 
 void RLInterpreter::Initialization() {
+    RLTypePrototype::killThemAll();
+
     if(mainProc_!=NULL)
         delete mainProc_;
 

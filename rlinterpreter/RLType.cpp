@@ -21,7 +21,14 @@ bool RLIdentRegister::add(int id, RLTypePrototype* identifier) {
 
 RLTypePrototype* RLIdentRegister::get(int id) {
     IdentifierRegister::iterator it = register_.find(id);
-    return it->second;
+    if(it != register_.end())
+        return it->second;
+    else
+        return NULL;
+}
+
+void RLIdentRegister::clear() {
+    register_ = IdentifierRegister();
 }
 
 IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
@@ -36,6 +43,9 @@ void RLTypePrototype::killThemAll() {
     for(int i = 0; i < linkCounter_.size(); i++) {
         delete linkCounter_[i];
     }
+
+    linkCounter_.clear();
+    RLIdentRegister::clear();
 }
 
 std::string RLTypePrototype::typeName(RLTypePrototype::RLTypeQualifier qualifier) {
@@ -106,7 +116,7 @@ RLTypePrototype::RLTypeQualifier RLTypePrototype::getTypeQualifier() const {
 RLBool::RLBool(bool val) : RLTypePrototype() {
 	init_(val);
 }
-RLBool::RLBool(bool val, int id) : RLTypePrototype() {
+RLBool::RLBool(bool val, int id) {
 	init_(val);
 	reg(id);
 }
@@ -172,10 +182,10 @@ void RLBool::print() {
 /*
  * class RLNumber : public RLType
  */
-RLNumber::RLNumber(int val) : RLTypePrototype() {
+RLNumber::RLNumber(int val) {
 	init_(val);
 }
-RLNumber::RLNumber(int val, int id) : RLTypePrototype() {
+RLNumber::RLNumber(int val, int id) {
 	init_(val);
 	reg(id);
 }
@@ -253,10 +263,10 @@ void RLNumber::print() {
 /*
  * class RLArray : public RLType
  */
-RLArray::RLArray(RLTypeQualifier qualifier) : RLTypePrototype() {
+RLArray::RLArray(RLTypeQualifier qualifier) {
     init_(qualifier);
 }
-RLArray::RLArray(RLTypeQualifier qualifier, int id) : RLTypePrototype() {
+RLArray::RLArray(RLTypeQualifier qualifier, int id) {
     init_(qualifier);
     reg(id);
 }
@@ -403,11 +413,11 @@ void RLArray::print() {
 /*
  * class RLLabel : public RLType
  */
-RLMark::RLMark(RLTypePrototype* owner, int line) : RLTypePrototype() {
+RLMark::RLMark(RLTypePrototype* owner, int line) {
     init_(owner,line);
 }
 
-RLMark::RLMark(RLTypePrototype* owner, int line, int id) : RLTypePrototype() {
+RLMark::RLMark(RLTypePrototype* owner, int line, int id) {
     init_(owner,line);
     reg(id);
 }
@@ -480,11 +490,11 @@ void RLMark::print() {
 /*
  * class RLProcedure : public RLType
  */
-RLProcedure::RLProcedure() : RLTypePrototype() {
+RLProcedure::RLProcedure() {
     init_();
 }
 
-RLProcedure::RLProcedure(int id) : RLTypePrototype() {
+RLProcedure::RLProcedure(int id) {
     init_();
     reg(id);
 }
