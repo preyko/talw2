@@ -96,7 +96,7 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <property name="movable">
          <bool>true</bool>
@@ -145,7 +145,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QTextBrowser" name="precompilerLog_2">
+           <widget class="QTextBrowser" name="applicationOutput">
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -198,11 +198,12 @@
    <addaction name="separator"/>
    <addaction name="actionOpen_RL_file"/>
    <addaction name="actionSave_RL_file"/>
+   <addaction name="actionSave_as"/>
    <addaction name="actionProcess"/>
   </widget>
   <action name="actionOpen_RL_file">
    <property name="text">
-    <string>Open RL file</string>
+    <string>Open</string>
    </property>
   </action>
   <action name="actionProcess">
@@ -212,7 +213,12 @@
   </action>
   <action name="actionSave_RL_file">
    <property name="text">
-    <string>Save RL file</string>
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSave_as">
+   <property name="text">
+    <string>Save as..</string>
    </property>
   </action>
  </widget>

@@ -1,6 +1,28 @@
 #pragma once
 
 #include "RLType.h"
+#include "RLTools.h"
+#include "RLInterpreter.h"
+
+class RLPerformException {
+public:
+    RLPerformException(std::string descr,int line) {
+        errLine_ = line;
+        description_ = descr;
+    }
+
+    int whatLine() {
+        return errLine_;
+    }
+
+    std::string what() {
+        return description_;
+    }
+
+private:
+    int errLine_;
+    std::string description_;
+};
 
 
 class RLCommandPrototype {
@@ -15,8 +37,14 @@ public:
 
     virtual void print() const = 0;
 
+    void setLinePosition(int line);
+    int getLinePosition();
+
 protected:
     RLCommandType commandType_;
+
+private:
+    int linePosition_;
 
 };
 

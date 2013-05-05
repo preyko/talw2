@@ -1,5 +1,17 @@
 #include "RLCommand.h"
+#include "RLPrecompiler.h"
 
+
+/*
+ * class RLCommandPrototype
+ */
+void RLCommandPrototype::setLinePosition(int line) {
+    linePosition_ = line;
+}
+
+int RLCommandPrototype::getLinePosition() {
+    return linePosition_;
+}
 
 /*
  * class RLDereference : public RLCommandBase
@@ -9,7 +21,9 @@ RLDereference::RLDereference(int ref) {
 
     if(res == NULL) {
         // Identifier ref does not declared before.
-        std::cout << "ERROR: Identifier " << ref << " does not declared before.\n";
+        RLPrecompiler::Exception(std::string("Identifier ") +
+                                 intToStr(ref) +
+                                 std::string(" does not declared before.\n"));
 
         return;
     } else {
@@ -33,7 +47,7 @@ RLTypePrototype* RLDereference::exec() const {
 }
 
 void RLDereference::print() const {
-    std::cout << "Container for:\n";
+    RLInterpreter::getApplicationOutput() << "Container for:\n";
     value_->print();
 }
 
@@ -137,7 +151,7 @@ bool RLConditional::isAccept_() const {
     if(res->getTypeQualifier() == RLTypePrototype::Bool)
         return ((RLBool*)res)->getValue();
     else
-        std::cout << "Unexpected comparsion error. Try to inspect your \'compare\' block in RLTypePrototype::applyBinary().\n";
+        RLTypeException("Unexpected comparison error. Try to inspect your \'compare\' block in RLTypePrototype::applyBinary().\n");
 }
 
 void RLConditional::exec_() const {
@@ -170,5 +184,5 @@ RLCommandPrototype* RLCycle::copy() const {
 }
 
 void RLCycle::print() const {
-
+    //RLInterpreter::getOutputStream()
 }

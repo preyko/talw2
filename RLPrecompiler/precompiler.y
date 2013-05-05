@@ -54,6 +54,11 @@ void Precompiler(const char* token_input) {
     do {
         yyparse();
     } while(!feof(yyin));
+
+    if(logstream != NULL && logstream != &std::cout) {
+        ((std::fstream*)logstream)->close();
+        delete logstream;
+    }
 }
 
 %}
@@ -159,7 +164,7 @@ ident:
         else {
           RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
           if(res->getTypeQualifier() != RLTypePrototype::Bool)
-              throw "ERROR: Expected Bool!";
+              throw Exception(std::string("Expected Bool!"),yylineno);
           else
               $$ = new RLDereference(res);
         }
@@ -173,7 +178,7 @@ ident:
         else {
             RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
             if(res->getTypeQualifier() != RLTypePrototype::Number)
-                throw "ERROR: Expected Number!";
+                throw Exception(std::string("Expected Number!"),yylineno);
             else
                 $$ = new RLDereference(res);
         }

@@ -1,6 +1,7 @@
 #include "RLType.h"
+#include "RLTools.h"
 #include "RLCommand.h"
-
+#include "RLInterpreter.h"
 
 /*
  * class RLIdentifierRegister
@@ -13,7 +14,9 @@ bool RLIdentRegister::add(int id, RLTypePrototype* identifier) {
 	} else {
 		// Bring an ERROR:
 		// ID collision.
-        std::cout << "ERROR: ID collision. Id " << id << " exist.\n";
+        throw RLTypeException(std::string("ID collision. Id ") +
+                                 intToStr(id) +
+                                 std::string(" exist."));
 
 		return false;
 	}
@@ -28,7 +31,7 @@ RLTypePrototype* RLIdentRegister::get(int id) {
 }
 
 void RLIdentRegister::clear() {
-    register_ = IdentifierRegister();
+    register_.clear();
 }
 
 IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
@@ -96,13 +99,13 @@ RLTypePrototype* RLTypePrototype::applyUnary(RLOperator oper) {
 
 RLTypePrototype* RLTypePrototype::applyBinary(RLOperator, RLTypePrototype*) {
 	// ERROR! Can't apply any operator for base RLType
-    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
+    throw RLTypeException(std::string("Can't apply any operator for base RLType."));
 
     return new RLBool(false);
 }
 
 void RLTypePrototype::print() {
-    std::cout << "RLType = Base." << std::endl;
+    RLInterpreter::getApplicationOutput() << "RLType = Base." << std::endl;
 }
 
 RLTypePrototype::RLTypeQualifier RLTypePrototype::getTypeQualifier() const {
@@ -116,7 +119,7 @@ RLTypePrototype::RLTypeQualifier RLTypePrototype::getTypeQualifier() const {
 RLBool::RLBool(bool val) : RLTypePrototype() {
 	init_(val);
 }
-RLBool::RLBool(bool val, int id) {
+RLBool::RLBool(bool val, int id) : RLTypePrototype() {
 	init_(val);
 	reg(id);
 }
@@ -153,7 +156,8 @@ RLTypePrototype* RLBool::applyBinary(RLOperator oper, RLTypePrototype* val) {
             return new RLBool(getValue() == (bool)valn->getValue());
 		} else {
 			// Can't compare RLBool with val->getTypeQualifier()
-            std::cout << "ERROR: Can't compare RLBool with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+            throw RLTypeException(std::string("Can't compare RLBool with ") +
+                                     RLTypePrototype::typeName(val->getTypeQualifier()));
 		}
 	break;
 	case assign:
@@ -162,12 +166,13 @@ RLTypePrototype* RLBool::applyBinary(RLOperator oper, RLTypePrototype* val) {
             setValue(valb->getValue());
 		} else {
 			// Can't assign RLBool with val->getTypeQualifier()
-            std::cout << "ERROR: Can't assign RLBool with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+            throw RLTypeException(std::string("Can't assign RLBool with ") +
+                                     RLTypePrototype::typeName(val->getTypeQualifier()));
 		}
 	break;
 	default:
         // Unexpected binary operator for RLBool
-        std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
+        throw RLTypeException(std::string("Unexpected binary operator for RLBool."));
 	break;
     }
 
@@ -175,17 +180,17 @@ RLTypePrototype* RLBool::applyBinary(RLOperator oper, RLTypePrototype* val) {
 }
 
 void RLBool::print() {
-    std::cout << "RLType = Bool, Value = " << value_ << std::endl;
+    RLInterpreter::getApplicationOutput() << "RLType = Bool, Value = " << value_ << std::endl;
 }
 
 
 /*
  * class RLNumber : public RLType
  */
-RLNumber::RLNumber(int val) {
+RLNumber::RLNumber(int val) : RLTypePrototype() {
 	init_(val);
 }
-RLNumber::RLNumber(int val, int id) {
+RLNumber::RLNumber(int val, int id) : RLTypePrototype() {
 	init_(val);
 	reg(id);
 }
@@ -216,7 +221,7 @@ RLTypePrototype* RLNumber::applyUnary(RLOperator oper) {
         break;
         default:
             // Unexpected unary operator for RLNumb
-            std::cout << "ERROR: Unexpected unary operator for RLNumb.\n";
+            throw RLTypeException(std::string("Unexpected unary operator for RLNumb."));
         break;
         }
     }
@@ -232,7 +237,8 @@ RLTypePrototype* RLNumber::applyBinary(RLOperator oper, RLTypePrototype* val) {
             return new RLBool(getValue() == valn->getValue());
 		} else {
 			// Can't compare RLNumb with val->getTypeQualifier()
-            std::cout << "ERROR: Can't compare RLNumb with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+            throw RLTypeException(std::string("Can't compare RLNumb with ") +
+                                     RLTypePrototype::typeName(val->getTypeQualifier()));
 
             return new RLBool(false);
 		}
@@ -243,12 +249,13 @@ RLTypePrototype* RLNumber::applyBinary(RLOperator oper, RLTypePrototype* val) {
             setValue(valn->getValue());
 		} else {
 			// Can't assign RLNumb with val->getTypeQualifier()
-            std::cout << "ERROR: Can't assign RLNumb with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+            throw RLTypeException(std::string("Can't assign RLNumb with ") +
+                                     RLTypePrototype::typeName(val->getTypeQualifier()));
 		}
 	break;
 	default:
         // Unexpected binary operator for RLBool
-        std::cout << "ERROR: Unexpected binary operator for RLBool.\n";
+        throw RLTypeException(std::string("Unexpected binary operator for RLBool."));
 	break;
     }
 
@@ -256,17 +263,17 @@ RLTypePrototype* RLNumber::applyBinary(RLOperator oper, RLTypePrototype* val) {
 }
 
 void RLNumber::print() {
-    std::cout << "RLType = Number, value = " << value_ << std::endl;
+    RLInterpreter::getApplicationOutput() << "RLType = Number, value = " << value_ << std::endl;
 }
 
 
 /*
  * class RLArray : public RLType
  */
-RLArray::RLArray(RLTypeQualifier qualifier) {
+RLArray::RLArray(RLTypeQualifier qualifier) : RLTypePrototype() {
     init_(qualifier);
 }
-RLArray::RLArray(RLTypeQualifier qualifier, int id) {
+RLArray::RLArray(RLTypeQualifier qualifier, int id) : RLTypePrototype() {
     init_(qualifier);
     reg(id);
 }
@@ -289,7 +296,8 @@ RLTypePrototype* RLArray::copy() const {
 RLTypePrototype* RLArray::getElem(int pos) const {
     if(elements_.find(pos)==elements_.end()) {
         // No such element in RLArray
-        std::cout << "ERROR: No such element in RLArray with index " << pos << ".\n";
+        throw RLTypeException(std::string("No such element in RLArray with index ") +
+                                 intToStr(pos));
 
         return NULL;
     } else {
@@ -299,12 +307,11 @@ RLTypePrototype* RLArray::getElem(int pos) const {
 
 void RLArray::setElem(int pos, RLTypePrototype* element) {
     if(element->getTypeQualifier()!=getElemQualifier()) {
-        // ERROR: Can't put different RLType in this Array
-        std::cout << "ERROR: Can\'t put "
-                  << RLTypePrototype::typeName(element->getTypeQualifier())
-                  << " type in Array of "
-                  << RLTypePrototype::typeName(getElemQualifier())
-                  << ".\n";
+        // Can't put different RLType in this Array
+        throw RLTypeException(std::string("Can\'t put ") +
+                                 RLTypePrototype::typeName(element->getTypeQualifier()) +
+                                 std::string(" type in Array of ") +
+                                 RLTypePrototype::typeName(getElemQualifier()));
 
         return;
     }
@@ -352,7 +359,8 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                 return new RLBool(true);
             } else {
                 // Can't compare RLArray with val->getTypeQualifier()
-                std::cout << "ERROR: Can't compare RLArray with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+                throw RLTypeException(std::string("Can't compare RLArray with ") +
+                                         RLTypePrototype::typeName(val->getTypeQualifier()));
 
                 return new RLBool(false);
             }
@@ -373,7 +381,8 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                 }
             } else {
                 // Can't assign RLArray with val->getTypeQualifier()
-                std::cout << "ERROR: Can't assign RLArray with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+                throw RLTypeException(std::string("Can't assign RLArray with ") +
+                                         RLTypePrototype::typeName(val->getTypeQualifier()));
             }
         break;
         case arrayat:
@@ -387,11 +396,11 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                 }
             } else {
                 // Only RLNumber can be used in[]
-                std::cout << "ERROR: Only RLNumber can be used in[].\n";
+                throw RLTypeException(std::string("Only RLNumber can be used in[]."));
             }
         default:
             // Unexpected binary operator for RLArray
-            std::cout << "ERROR: Unexpected binary operator for RLArray.\n";
+            throw RLTypeException(std::string("Unexpected binary operator for RLArray."));
         break;
     }
 
@@ -399,11 +408,11 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
 }
 
 void RLArray::print() {
-    std::cout << "RLType = Array of " << RLTypePrototype::typeName(getElemQualifier()) << ".\n\tValues\n";
+    RLInterpreter::getApplicationOutput() << "RLType = Array of " << RLTypePrototype::typeName(getElemQualifier()) << ".\n\tValues\n";
 
     RLArrayStorage::const_iterator i;
     for(i = elements_.begin(); i != elements_.end(); i++) {
-        std::cout << "[" << i->first << "] ";
+        RLInterpreter::getApplicationOutput() << "[" << i->first << "] ";
 
         i->second->print();
     }
@@ -413,11 +422,11 @@ void RLArray::print() {
 /*
  * class RLLabel : public RLType
  */
-RLMark::RLMark(RLTypePrototype* owner, int line) {
+RLMark::RLMark(RLTypePrototype* owner, int line) : RLTypePrototype() {
     init_(owner,line);
 }
 
-RLMark::RLMark(RLTypePrototype* owner, int line, int id) {
+RLMark::RLMark(RLTypePrototype* owner, int line, int id) : RLTypePrototype() {
     init_(owner,line);
     reg(id);
 }
@@ -425,11 +434,11 @@ RLMark::RLMark(RLTypePrototype* owner, int line, int id) {
 void RLMark::init_(RLTypePrototype* owner, int line) {
     meta_.typeName = Mark;
 
-    std::cout << "RLMark in development, it will come later.\n";
+    RLInterpreter::getApplicationOutput() << "RLMark in development, it will come later.\n";
 
     if(owner->getTypeQualifier() != Procedure) {
         // Only RLProcedure can be owner of RLMark.
-        std::cout << "ERROR: Only RLProcedure can be owner of RLMark.\n";
+        throw RLTypeException(std::string("Only RLProcedure can be owner of RLMark."));
         return;
     }
     setOwner((RLProcedure*) owner);
@@ -457,12 +466,12 @@ RLTypePrototype* RLMark::applyUnary(RLOperator oper) {
                     return new RLBool(true);
                 } else {
                     // RLMark transaction cannot be performed because procedure Owner is not declared.
-                    std::cout << "ERROR: RLMark transaction cannot be performed because procedure Owner is not declared.\n";
+                    throw RLTypeException(std::string("RLMark transaction cannot be performed because procedure Owner is not declared."));
                 }
             break;
             default:
                 // Can't perform not \'makeTransition\' operation for RLMark
-                std::cout << "ERROR: Can't perform not \'makeTransition\' operation for RLMark\n";
+                throw RLTypeException(std::string("Can't perform not \'makeTransition\' operation for RLMark"));
             break;
         }
     }
@@ -472,29 +481,26 @@ RLTypePrototype* RLMark::applyUnary(RLOperator oper) {
 
 RLTypePrototype* RLMark::applyBinary(RLOperator oper, RLTypePrototype* val) {
     // No one binary operation declared for RLMark.
-    std::cout << "No one binary operation declared for RLMark.\n";
+    throw RLTypeException(std::string("No one binary operation declared for RLMark.\n"));
 
     return this;
 }
 
 void RLMark::print() {
     if(owner_!=NULL) {
-        std::cout << "RLMark for RLProcedure on line " << linePointer_ << "\n\t";
+        RLInterpreter::getApplicationOutput() << "RLMark for RLProcedure on line " << linePointer_ << "\n\t";
         owner_->printCommand(linePointer_);
-    } else {
-        // This RLMark does not have owner RLProcedure.
-        std::cout << "This RLMark does not have owner RLProcedure.\n";
     }
 }
 
 /*
  * class RLProcedure : public RLType
  */
-RLProcedure::RLProcedure() {
+RLProcedure::RLProcedure() : RLTypePrototype() {
     init_();
 }
 
-RLProcedure::RLProcedure(int id) {
+RLProcedure::RLProcedure(int id) : RLTypePrototype() {
     init_();
     reg(id);
 }
@@ -541,7 +547,11 @@ void RLProcedure::setLinePointer(int nline) {
 
 void RLProcedure::exec_() {
     for(int i = 0; i < chain_.size(); i++) {
-        (RLCommandPrototype*)(chain_.at(i))->exec();
+        try {
+            (RLCommandPrototype*)(chain_.at(i))->exec();
+        } catch(RLTypeException exc) {
+            throw RLPerformException(exc.what(),chain_.at(i)->getLinePosition());
+        }
     }
 }
 
@@ -553,7 +563,7 @@ RLTypePrototype* RLProcedure::applyUnary(RLOperator oper) {
             break;
             default:
                 // Can't perform not \'perform\' operation for RLProcedure
-                std::cout << "ERROR: Can't perform not \'perform\' operation for RLProcedure";
+                throw RLTypeException(std::string("Can't perform not \'perform\' operation for RLProcedure"));
             break;
         }
     }
@@ -563,7 +573,7 @@ RLTypePrototype* RLProcedure::applyUnary(RLOperator oper) {
 
 RLTypePrototype* RLProcedure::applyBinary(RLOperator oper, RLTypePrototype* val) {
     // No one binary operation declared for RLProcedure.
-    std::cout << "No one binary operation declared for RLProcedure.\n";
+    throw RLTypeException(std::string("No one binary operation declared for RLProcedure."));
 
     switch(oper) {
         case assign:
@@ -581,12 +591,13 @@ RLTypePrototype* RLProcedure::applyBinary(RLOperator oper, RLTypePrototype* val)
                 }
             } else {
                 // Can't assign RLProcedure with val->getTypeQualifier()
-                std::cout << "ERROR: Can't assign RLProcedure with " << RLTypePrototype::typeName(val->getTypeQualifier()) << ".\n";
+                throw RLTypeException(std::string("Can't assign RLProcedure with ") +
+                                         RLTypePrototype::typeName(val->getTypeQualifier()));
             }
         break;
         default:
             // Unexpected binary operator for RLProcedure
-            std::cout << "ERROR: Unexpected binary operator for RLProcedure.\n";
+            throw RLTypeException(std::string("Unexpected binary operator for RLProcedure."));
         break;
     }
 

@@ -5,6 +5,21 @@
 #include <vector>
 #include <map>
 
+
+class RLTypeException {
+public:
+    RLTypeException(std::string descr) {
+        description_ = descr;
+    }
+
+    std::string what() {
+        return description_;
+    }
+
+private:
+    std::string description_;
+};
+
 enum RLOperator { show, np, increment, decrement, assign, compare, arrayat, maketransition, perform };
 
 /* Solution to the crosslinks problem */

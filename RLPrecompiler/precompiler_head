@@ -27,4 +27,8 @@ namespace RLPrecompiler {
 
 std::ostream* logstream;
 
+void setPrecompilerOutput(const char* lo) {
+    logstream = new std::fstream("log.tmp",std::ios_base::in);
+}
+
 using namespace std;

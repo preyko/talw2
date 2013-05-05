@@ -1,13 +1,11 @@
 #include "RLInterpreter.h"
 
+std::ofstream* RLInterpreter::outputStream_ = NULL;
 RLProcedure* RLInterpreter::mainProc_ = NULL;
 RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFunctions();
 
 void RLInterpreter::Initialization() {
     RLTypePrototype::killThemAll();
-
-    if(mainProc_!=NULL)
-        delete mainProc_;
 
     mainProc_ = new RLProcedure(-1);
 
@@ -15,7 +13,12 @@ void RLInterpreter::Initialization() {
 }
 
 void RLInterpreter::Perform() {
-    mainProc_->exec();
+    if(mainProc_==NULL)
+        throw RLPerformException(std::string("You should call RLInterpreter::Initialization() before."),0);
+    else
+        mainProc_->exec();
+
+    outputStream_->close();
 }
 
 RLProcedure* RLInterpreter::getMainFunction() {
@@ -40,4 +43,15 @@ RLProcedure* RLInterpreter::downStack() {
     stack_.pop_back();
 
     return res;
+}
+
+void RLInterpreter::setApplicationOutput(std::string file_name) {
+    outputStream_ = new std::ofstream(file_name.c_str());
+}
+
+std::ostream& RLInterpreter::getApplicationOutput() {
+    if(outputStream_!=NULL)
+        return *outputStream_;
+    else
+        return std::cout;
 }

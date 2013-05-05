@@ -7,48 +7,78 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->actionOpen_RL_file,SIGNAL(triggered()),SLOT(openRLFile()));
+    connect(ui->actionSave_RL_file,SIGNAL(triggered()),SLOT(saveRLFile()));
+    connect(ui->actionSave_as,SIGNAL(triggered()),SLOT(saveAsRLFile()));
     connect(ui->actionProcess,SIGNAL(triggered()),SLOT(startProcess()));
 
     connect(ui->codeBrowser,SIGNAL(textChanged()),SLOT(codeChanged()));
 }
 
 void MainWindow::openRLFile() {
-    ui->codeBrowser->clear();
-
     QString filename = QFileDialog::getOpenFileName(this,
-                                                     QString::fromLocal8Bit("Открыть видео"),
-                                                     QDir::home().absolutePath());
-    QFile rl_file(filename);
+                                                    QString::fromLocal8Bit("Open RLCode file."),
+                                                    QDir::home().absolutePath(),
+                                                    tr("RLCode file (*.rl)"));
+    if(filename.isEmpty()) return;
 
+    QFile rl_file(filename);
     fillCode_(rl_file);
 
-    rlFile_ = filename;
-    ui->statusBar->showMessage(rlFile_);
+    codeFileName_ = filename;
+    ui->statusBar->showMessage(codeFileName_);
 }
 
-void MainWindow::startProcess() {
+void MainWindow::saveRLFile() {
     QString code = ui->codeBrowser->toPlainText();
-    QFile codeTmp("code.tmp");
+    QFile codeTmp(codeFileName_);
     codeTmp.open(QIODevice::WriteOnly);
     codeTmp.write(code.toAscii());
     codeTmp.close();
 
-    RLTokenizer::Tokenize("code.tmp","tok.tmp");
+    ui->statusBar->showMessage(codeFileName_);
+}
 
-    QFile tok("tok.tmp");
-    fillTO_(tok);
+void MainWindow::saveAsRLFile() {
+    codeFileName_ = QFileDialog::getSaveFileName(this,
+                                                     QString::fromLocal8Bit("Save RLCode as..."),
+                                                     QDir::home().absolutePath());
+    saveRLFile();
+}
 
-    RLInterpreter::Initialization();
+void MainWindow::startProcess() {
+    try {
+        QString code = ui->codeBrowser->toPlainText();
+        QFile codeTmp("code.tmp");
+        codeTmp.open(QIODevice::WriteOnly);
+        codeTmp.write(code.toAscii());
+        codeTmp.close();
 
-    std::ofstream log("log.tmp");
-    RLPrecompiler::logstream = &log;
-    RLPrecompiler::Precompiler("tok.tmp");
-    log.close();
+        RLTokenizer::Tokenize("code.tmp","tok.tmp");
 
-    QFile llog("log.tmp");
-    fillLog_(llog);
+        QFile tok("tok.tmp");
+        fillTO_(tok);
 
-    RLInterpreter::Perform();
+        RLInterpreter::Initialization();
+
+        RLPrecompiler::setPrecompilerOutput("log.tmp");
+        RLPrecompiler::Precompiler("tok.tmp");
+
+        QFile llog("log.tmp");
+        fillLog_(llog);
+
+        RLInterpreter::setApplicationOutput("appout.tmp");
+        RLInterpreter::Perform();
+
+        QFile app_out("appout.tmp");
+        fillAppOut_(app_out);
+
+    } catch(RLPerformException& exc) {
+        qCritical() << QString(exc.what().c_str());
+    } catch(RLTypeException& exc) {
+        qCritical() << QString(exc.what().c_str());
+    } catch(RLPrecompiler::Exception& exc) {
+        qCritical() << "Syntax error on line #" << exc.whatLine() << ":" << QString(exc.what().c_str());
+    }
 }
 
 void MainWindow::fillCode_(QFile& source) {
@@ -95,7 +125,7 @@ void MainWindow::fillTO_(QFile& source) {
 void MainWindow::fillLog_(QFile& source) {
     ui->precompilerLog->clear();
 
-    source.open(QIODevice::ReadOnly | QIODevice::Text);
+    source.open(QIODevice::ReadOnly);
 
     if(!source.exists()) {
         QMessageBox mb(this);
@@ -110,10 +140,28 @@ void MainWindow::fillLog_(QFile& source) {
     source.close();
 }
 
+void MainWindow::fillAppOut_(QFile& source) {
+    ui->applicationOutput->clear();
+
+    source.open(QIODevice::ReadOnly);
+
+    if(!source.exists()) {
+        QMessageBox mb(this);
+        mb.setText("Such file doesn't exist.");
+        mb.setDefaultButton(QMessageBox::Ok);
+        mb.show();
+    }
+
+    while(!source.atEnd())
+        ui->applicationOutput->append(source.readAll());
+
+    source.close();
+}
+
 void MainWindow::codeChanged() {
     codeNotChanged_ = false;
 
-    statusBar()->showMessage(rlFile_ +
+    statusBar()->showMessage(codeFileName_ +
                    tr("*"));
 }
 

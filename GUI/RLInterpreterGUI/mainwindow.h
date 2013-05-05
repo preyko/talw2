@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <fstream>
+#include <iostream>
+
 #include <QMainWindow>
 
 #include <QMessageBox>
@@ -33,6 +36,9 @@ public:
 
 public slots:
     void openRLFile();
+    void saveRLFile();
+    void saveAsRLFile();
+
     void startProcess();
 
     void codeChanged();
@@ -46,8 +52,9 @@ private:
     void fillCode_(QFile& source);
     void fillTO_(QFile& source);
     void fillLog_(QFile& source);
+    void fillAppOut_(QFile& source);
 
-    QString rlFile_;
+    QString codeFileName_;
 
     bool codeNotChanged_;
 };
