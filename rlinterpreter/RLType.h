@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-enum RLOperator { np, increment, decrement, assign, compare, arrayat, maketransition, perform };
+enum RLOperator { show, np, increment, decrement, assign, compare, arrayat, maketransition, perform };
 
 /* Solution to the crosslinks problem */
 class RLTypePrototype;

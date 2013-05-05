@@ -12,7 +12,6 @@ INCLUDDIR= .
 BUILDDIR=build
 
 
-
 all: process_precompiller
 	$(CPP) -I $(INCLUDDIR) -lfl -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
 	$(CPP) -I $(INCLUDDIR) -ggdb -DMAIN -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o

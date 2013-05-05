@@ -39,7 +39,6 @@ void Precompiler(const char* token_input) {
         logstream = &std::cout;
 
     yydebug = 1;
-
     do {
         yyparse();
     } while(!feof(yyin));
