@@ -1,13 +1,24 @@
-#pragma once
+#ifndef RLPRECOMPILER_H
+#define RLPRECOMPILER_H
+
+#include <iostream>
+#include <fstream>
 
 namespace RLPrecompiler {
-    int Precompiler(char** token_input) {
-        yyin = fopen(token_input,"r");
 
-        do {
-            yyparse();
-        } while(!feof(yyin));
-
-        return 0;
+class Exception {
+public:
+    Exception(std::string descr) {
+        description = descr;
     }
+
+    std::string description;
+};
+
+extern FILE* yyin;
+std::ostream* logstream;
+
+void Precompiler(const char* token_input);
 }
+
+#endif

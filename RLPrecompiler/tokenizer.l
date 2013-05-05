@@ -14,14 +14,14 @@ RLNAMESPACE_BEGIN
 %%
 	/* Constants */
 T|F                     fprintf(token_output,"BOOLC,val=%s ",yytext);
-[1-9][0-9]+             fprintf(token_output,"NUMBC,val=%s ",yytext);
-\-[1-9][0-9]+           fprintf(token_output,"NUMBC,val=%s ",yytext);
+[0-9]+                  fprintf(token_output,"NUMBC,val=%s ",yytext);
+\-[0-9]+                fprintf(token_output,"NUMBC,val=%s ",yytext);
 
 	/* Variable identifier */
 \~[0-9]+                fprintf(token_output,"MARKI,id=%s ",&yytext[1]);
 \$[0-9]+                fprintf(token_output,"PROCI,id=%s ",&yytext[1]);
-,[0-9]+                 fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
-.[0-9]+                 fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
+\,[0-9]+                fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
+\.[0-9]+                fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
 
 	/* Operators */
 \<\-                    fprintf(token_output,"ASSIGN ");
@@ -65,6 +65,23 @@ namespace RLTokenizer {
         token_output = output;
 
         yylex();
+    }
+
+    void Tokenize(const char* input, const char* output) {
+        FILE* in;
+        FILE* out;
+
+        in = fopen(input,"r");
+        out = fopen(output,"w");
+
+        if(in == NULL)
+            throw Exception(std::string("Can't open file called ") +
+                            std::string(input));
+        if(out == NULL)
+            throw Exception(std::string("Can't create file with name ") +
+                            std::string(output));
+
+        Tokenize(in,out);
     }
 }
 

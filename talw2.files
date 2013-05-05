@@ -20,3 +20,7 @@ RLPrecompiler/tokenizer.l
 RLPrecompiler/token_reader.l
 RLPrecompiler/RLTokenizer.h
 RLPrecompiler/RLPrecompiler.h
+RLPrecompiler/precompiler_head
+RLPrecompiler/precompiler_tail
+RLPrecompiler/token_reader_head
+RLPrecompiler/token_reader_tail

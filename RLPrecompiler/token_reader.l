@@ -1,47 +1,127 @@
 %option noyywrap
+%option yylineno
 
-%{
+%top{
 #include <stdio.h>
 
 #include "precompiler.hh"
-%}
+
+// This just make namespaces invisible for Flex
+#define RLNAMESPACE_BEGIN namespace RLPrecompiler {
+#define RLNAMESPACE_END }
+
+RLNAMESPACE_BEGIN
+}
 %%
 
-BOOLC,val=[T|F]                 printf("%s",yytext);
-NUMBC,val=[1-9][0-9]+           printf("%s",yytext);
-NUMBC,val=-[1-9][0-9]+          printf("%s",yytext);
+BOOLC,val=[T|F]                 {
+    return BOOLC;
+}
+NUMBC,val=[0-9]+           {
+    return NUMBC;
+}
+NUMBC,val=-[0-9]+           {
+    return NUMBC;
+}
 
 
-(MARKI,id=[1-9][0-9]+)          printf("%s",yytext);
-(PROCI,id=[1-9][0-9]+)          printf("%s",yytext);
-(BOOLI,id=[1-9][0-9]+)          printf("%s",yytext);
-(NUMBI,id=[1-9][0-9]+)          printf("%s",yytext);
+MARKI,id=[0-9]+            {
+    return MARKI;
+}
+PROCI,id=[0-9]+            {
 
-ASSIGN                          printf("%s",yytext);
-COMPARE                         printf("%s",yytext);
+    return PROCI;
+}
+BOOLI,id=[0-9]+            {
 
-INC                             printf("%s",yytext);
-DEC                             printf("%s",yytext);
+    return BOOLI;
+}
+NUMBI,id=[0-9]+            {
 
-NOR                             printf("%s",yytext);
+    return NUMBI;
+}
 
-PLEASE                          printf("%s",yytext);
+ASSIGN                          {
 
-LINK                            printf("%s",yytext);
-RLINK                           printf("%s",yytext);
+    return ASSIGN;
+}
+COMPARE                         {
 
-PRINT                           printf("%s",yytext);
+    return COMPARE;
+}
 
-OFBRACE                         printf("%s",yytext);
-EFBRACE                         printf("%s",yytext);
-OSBRACE                         printf("%s",yytext);
-ESBRACE                         printf("%s",yytext);
-OBRACE                          printf("%s",yytext);
-EBRACE                          printf("%s",yytext);
-SEMICOLON                       printf("%s",yytext);
+INC                             {
 
-[\t ]+                          printf("%s",yytext);
-\n                              printf("%s",yytext);
+    return INC;
+}
+DEC                             {
 
-ERRTOKEN\ '%s'\ on\ line\ #[0-9]+.  printf("%s",yytext);
+    return DEC;
+}
+
+NOR                             {
+
+    return NOR;
+
+}
+
+PLEASE                          {
+
+    return PLEASE;
+}
+
+LINK                            {
+
+    return LINK;
+}
+RLINK                           {
+
+    return RLINK;
+}
+
+PRINT                           {
+
+    return PRINT;
+}
+
+OFBRACE                         {
+
+    return OFBRACE;
+}
+EFBRACE                         {
+
+    return EFBRACE;
+}
+OSBRACE                         {
+
+    return OSBRACE;
+}
+ESBRACE                         {
+
+    return ESBRACE;
+}
+OBRACE                          {
+
+    return OBRACE;
+}
+EBRACE                          {
+
+    return EBRACE;
+}
+SEMICOLON                       {
+
+    return SEMICOLON;
+}
+
+[\t ]+                          {
+
+}
+\n                              {
+
+ }
+
+ERRTOKEN\ '%s'\ on\ line\ #[0-9]+. {
+
+}
 %%
+RLNAMESPACE_END
