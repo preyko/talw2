@@ -16,7 +16,7 @@ public:
 };
 
 extern FILE* yyin;
-std::ostream* logstream;
+extern std::ostream* logstream;
 
 void Precompiler(const char* token_input);
 }

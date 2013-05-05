@@ -25,12 +25,15 @@ private:
 
 class RLTypePrototype {
 public:
+    typedef std::vector<RLTypePrototype*> LinkCounter;
+
     enum RLTypeQualifier { Base, Bool, Number, Array, Mark, Procedure };
 	
 	struct RLTypeMeta {
 		RLTypeQualifier typeName;	
 	};
 
+    static void killThemAll();
     static std::string typeName(RLTypeQualifier qualifier);
 
     RLTypePrototype();
@@ -48,6 +51,8 @@ public:
 
 protected:
     RLTypeMeta meta_;
+
+    static LinkCounter linkCounter_;
 };
 
 class RLBool : public RLTypePrototype {

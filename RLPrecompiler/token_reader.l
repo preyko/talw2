@@ -123,5 +123,9 @@ SEMICOLON                       {
 ERRTOKEN\ '%s'\ on\ line\ #[0-9]+. {
 
 }
+
+<<EOF>>                         {
+    return EOf;
+}
 %%
 RLNAMESPACE_END

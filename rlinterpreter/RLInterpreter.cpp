@@ -4,6 +4,9 @@ RLProcedure* RLInterpreter::mainProc_ = NULL;
 RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFunctions();
 
 void RLInterpreter::Initialization() {
+    if(mainProc_!=NULL)
+        delete mainProc_;
+
     mainProc_ = new RLProcedure(-1);
 
     stack_.push_back(mainProc_);

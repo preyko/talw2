@@ -66,7 +66,7 @@ private:
 
 class RLConditional : public RLCommandPrototype {
 public:
-    RLConditional(RLTypePrototype* effectcode, RLCommandPrototype* condition);
+    RLConditional(RLCommandPrototype* effectcode, RLCommandPrototype* condition);
     ~RLConditional();
 
     virtual RLCommandPrototype* copy() const;
@@ -80,7 +80,7 @@ protected:
     bool isAccept_() const;
 
     RLCommandPrototype* condition_;
-    RLProcedure* effect_;
+    RLCommandPrototype* effect_;
 
 private:
     RLTypePrototype* Truth_;
@@ -90,7 +90,7 @@ private:
 
 class RLCycle : public RLConditional {
 public:
-    RLCycle(RLTypePrototype* effectcode, RLCommandPrototype* condition);
+    RLCycle(RLCommandPrototype* effectcode, RLCommandPrototype* condition);
 
     virtual RLCommandPrototype* copy() const;
 

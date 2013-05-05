@@ -10,6 +10,7 @@
 #define RLNAMESPACE_END }
 
 RLNAMESPACE_BEGIN
+FILE* token_output;
 }
 %%
 	/* Constants */
@@ -20,8 +21,8 @@ T|F                     fprintf(token_output,"BOOLC,val=%s ",yytext);
 	/* Variable identifier */
 \~[0-9]+                fprintf(token_output,"MARKI,id=%s ",&yytext[1]);
 \$[0-9]+                fprintf(token_output,"PROCI,id=%s ",&yytext[1]);
-\,[0-9]+                fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
-\.[0-9]+                fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
+\.[0-9]+                fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
+\,[0-9]+                fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
 
 	/* Operators */
 \<\-                    fprintf(token_output,"ASSIGN ");
@@ -82,6 +83,9 @@ namespace RLTokenizer {
                             std::string(output));
 
         Tokenize(in,out);
+
+        fclose(in);
+        fclose(out);
     }
 }
 

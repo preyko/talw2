@@ -1,7 +1,12 @@
 #include <iostream>
+#include <fstream>
 
 #include <stdio.h>
 #include <string.h>
+
+#include "RLType.h"
+#include "RLCommand.h"
+#include "RLInterpreter.h"
 
 #include "RLPrecompiler.h"
 
@@ -9,7 +14,9 @@
 #ifdef MAIN
 int main(int argn,const char** arg) {
     if(argn == 2) {
+        RLInterpreter::Initialization();
         RLPrecompiler::Precompiler(arg[1]);
+        RLInterpreter::Perform();
     }
 
     return 0;
@@ -17,5 +24,7 @@ int main(int argn,const char** arg) {
 #endif
 
 namespace RLPrecompiler {
+
+std::ostream* logstream;
 
 using namespace std;

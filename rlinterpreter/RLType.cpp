@@ -30,43 +30,12 @@ IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
 /*
  * class RLType
  */
-RLTypePrototype::RLTypePrototype() {
-}
+RLTypePrototype::LinkCounter RLTypePrototype::linkCounter_ = RLTypePrototype::LinkCounter();
 
-bool RLTypePrototype::reg(int id) {
-    RLIdentRegister::add(id,this);
-}
-
-RLTypePrototype* RLTypePrototype::copy() const {
-    return new RLTypePrototype();
-}
-
-RLTypePrototype* RLTypePrototype::applyUnary(RLOperator oper) {
-    switch(oper) {
-        case show:
-            print();
-
-            return NULL;
-        break;
-        default:
-            return this;
-        break;
+void RLTypePrototype::killThemAll() {
+    for(int i = 0; i < linkCounter_.size(); i++) {
+        delete linkCounter_[i];
     }
-}
-
-RLTypePrototype* RLTypePrototype::applyBinary(RLOperator, RLTypePrototype*) {
-	// ERROR! Can't apply any operator for base RLType
-    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
-
-    return new RLBool(false);
-}
-
-void RLTypePrototype::print() {
-    std::cout << "RLType = Base." << std::endl;
-}
-
-RLTypePrototype::RLTypeQualifier RLTypePrototype::getTypeQualifier() const {
-    return meta_.typeName;
 }
 
 std::string RLTypePrototype::typeName(RLTypePrototype::RLTypeQualifier qualifier) {
@@ -89,6 +58,47 @@ std::string RLTypePrototype::typeName(RLTypePrototype::RLTypeQualifier qualifier
     }
 }
 
+RLTypePrototype::RLTypePrototype() {
+    linkCounter_.push_back(this);
+}
+
+bool RLTypePrototype::reg(int id) {
+    RLIdentRegister::add(id,this);
+}
+
+RLTypePrototype* RLTypePrototype::copy() const {
+    return new RLTypePrototype();
+}
+
+RLTypePrototype* RLTypePrototype::applyUnary(RLOperator oper) {
+    switch(oper) {
+        case show:
+            print();
+
+            return this;
+        break;
+        default:
+        break;
+    }
+
+    return NULL;
+}
+
+RLTypePrototype* RLTypePrototype::applyBinary(RLOperator, RLTypePrototype*) {
+	// ERROR! Can't apply any operator for base RLType
+    std::cout << "ERROR: Can't apply any operator for base RLType.\n";
+
+    return new RLBool(false);
+}
+
+void RLTypePrototype::print() {
+    std::cout << "RLType = Base." << std::endl;
+}
+
+RLTypePrototype::RLTypeQualifier RLTypePrototype::getTypeQualifier() const {
+    return meta_.typeName;
+}
+
 
 /*
  * class RLBool : public RLType
@@ -96,7 +106,7 @@ std::string RLTypePrototype::typeName(RLTypePrototype::RLTypeQualifier qualifier
 RLBool::RLBool(bool val) : RLTypePrototype() {
 	init_(val);
 }
-RLBool::RLBool(bool val, int id) {
+RLBool::RLBool(bool val, int id) : RLTypePrototype() {
 	init_(val);
 	reg(id);
 }
@@ -165,7 +175,7 @@ void RLBool::print() {
 RLNumber::RLNumber(int val) : RLTypePrototype() {
 	init_(val);
 }
-RLNumber::RLNumber(int val, int id) {
+RLNumber::RLNumber(int val, int id) : RLTypePrototype() {
 	init_(val);
 	reg(id);
 }
@@ -243,10 +253,10 @@ void RLNumber::print() {
 /*
  * class RLArray : public RLType
  */
-RLArray::RLArray(RLTypeQualifier qualifier) {
+RLArray::RLArray(RLTypeQualifier qualifier) : RLTypePrototype() {
     init_(qualifier);
 }
-RLArray::RLArray(RLTypeQualifier qualifier, int id) {
+RLArray::RLArray(RLTypeQualifier qualifier, int id) : RLTypePrototype() {
     init_(qualifier);
     reg(id);
 }
@@ -393,11 +403,11 @@ void RLArray::print() {
 /*
  * class RLLabel : public RLType
  */
-RLMark::RLMark(RLTypePrototype* owner, int line) {
+RLMark::RLMark(RLTypePrototype* owner, int line) : RLTypePrototype() {
     init_(owner,line);
 }
 
-RLMark::RLMark(RLTypePrototype* owner, int line, int id) {
+RLMark::RLMark(RLTypePrototype* owner, int line, int id) : RLTypePrototype() {
     init_(owner,line);
     reg(id);
 }
@@ -470,11 +480,11 @@ void RLMark::print() {
 /*
  * class RLProcedure : public RLType
  */
-RLProcedure::RLProcedure() {
+RLProcedure::RLProcedure() : RLTypePrototype() {
     init_();
 }
 
-RLProcedure::RLProcedure(int id) {
+RLProcedure::RLProcedure(int id) : RLTypePrototype() {
     init_();
     reg(id);
 }
@@ -529,7 +539,7 @@ RLTypePrototype* RLProcedure::applyUnary(RLOperator oper) {
     if(RLTypePrototype::applyUnary(oper) == NULL) {
         switch(oper) {
             case perform:
-                exec_();
+                exec();
             break;
             default:
                 // Can't perform not \'perform\' operation for RLProcedure

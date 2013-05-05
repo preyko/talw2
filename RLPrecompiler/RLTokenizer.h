@@ -14,7 +14,7 @@ public:
     std::string description;
 };
 
-FILE* token_output;
+extern FILE* token_output;
 
 void Tokenize(FILE* input, FILE* output);
 void Tokenize(const char* input, const char* output);

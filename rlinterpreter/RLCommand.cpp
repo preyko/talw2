@@ -45,7 +45,10 @@ RLCommand::RLCommand(RLOperator oper, RLCommandPrototype* f, RLCommandPrototype*
 }
 
 RLCommand::RLCommand(RLOperator oper, RLTypePrototype* f, RLTypePrototype* s) {
-    init_(oper,new RLDereference(f),new RLDereference(s));
+    if(s == NULL)
+        init_(oper,new RLDereference(f),NULL);
+    else
+        init_(oper,new RLDereference(f),new RLDereference(s));
 }
 
 RLCommand::RLCommand(RLOperator oper, int idf, int ids) {
@@ -99,16 +102,12 @@ RLTypePrototype* RLCommand::exec_() const {
 /*
  * class RLConditional : public RLCommandBase
  */
-RLConditional::RLConditional(RLTypePrototype* effectcode, RLCommandPrototype* condition) {
+RLConditional::RLConditional(RLCommandPrototype* effectcode, RLCommandPrototype* condition) {
     Truth_ = new RLBool(true);
 
     condition_ = new RLCommand(compare,condition,new RLDereference(Truth_));
 
-    if(effectcode->getTypeQualifier() == RLTypePrototype::Procedure) {
-        effect_ = (RLProcedure*) effectcode;
-    } else {
-        std::cout << "ERROR: Only RLProcedure accepted as RLConditional & RLCycle command effect code.\n";
-    }
+    effect_ = effectcode;
 }
 
 RLConditional::~RLConditional() {
@@ -148,7 +147,7 @@ void RLConditional::exec_() const {
 /*
  * class RLCycle : public RLConditional
  */
-RLCycle::RLCycle(RLTypePrototype* effectcode, RLCommandPrototype* condition)
+RLCycle::RLCycle(RLCommandPrototype* effectcode, RLCommandPrototype* condition)
     : RLConditional(effectcode,condition) {
 }
 

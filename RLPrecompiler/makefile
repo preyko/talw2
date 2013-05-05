@@ -7,7 +7,8 @@ CC = gcc
 LIBNAME=rlprecomp
 LIBFILE=lib$(LIBNAME).a
 
-INCLUDDIR= .
+INCLUDDIR= . -I ../rlinterpreter
+LIBINC = -L ../rlinterpreter -l rltype
 
 BUILDDIR=build
 
@@ -16,7 +17,7 @@ all: process_precompiller
 	$(CPP) -I $(INCLUDDIR) -lfl -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
 	$(CPP) -I $(INCLUDDIR) -ggdb -DMAIN -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
 
-	$(CPP) -I $(INCLUDDIR) -ggdb $(BUILDDIR)/precompiler.o $(BUILDDIR)/token_reader.o -o Precompiler
+	$(CPP) -I $(INCLUDDIR) -ggdb $(BUILDDIR)/precompiler.o $(BUILDDIR)/token_reader.o $(LIBINC) -o Precompiler
 
 process_precompiller: token_reader.l precompiler.y
 	mkdir -p $(BUILDDIR)

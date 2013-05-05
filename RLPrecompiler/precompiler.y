@@ -10,9 +10,20 @@ struct RLTokenValue {
 };
 
 //#define YYSTYPE RLTokenValue
-#define YYSTYPE std::string
+//#define YYSTYPE std::string
+#define YYSTYPE RLCommandPrototype*
+
+struct Token {
+    std::string d;
+    RLCommandPrototype* t;
+};
+
+//#define YYSTYPE Token*
+
+
 
 int yydebug = 1;
+YYSTYPE yyval;
 extern int yylineno;
 extern char* yytext;
 
@@ -21,11 +32,11 @@ extern int yywrap(void);
 extern int yylex(void);
 
 void yyerror(const char* str) {
-        fprintf(stderr,"Error on line %d: %s\n",yylineno, str);
+        (*logstream) << "Error on line " << yylineno << ": " << str << std::endl;
 }
 
 int yywrap() {
-        return 1;
+        return 0;
 }
 
 void Precompiler(const char* token_input) {
@@ -39,6 +50,7 @@ void Precompiler(const char* token_input) {
         logstream = &std::cout;
 
     yydebug = 1;
+
     do {
         yyparse();
     } while(!feof(yyin));
@@ -52,22 +64,28 @@ BOOLI NUMBI MARKI PROCI // IDENTIFIER
 BOOLC NUMBC // CONSTANT
 ASSIGN COMPARE INC DEC LINK RLINK NOR  // OPERATORS
 PRINT PLEASE
+EOf
 
 
 %%
 procedure:
     procedure line
     |
+    procedure EOf {
+        return 0;
+    }
+    |
     ;
 
 line:
     command SEMICOLON {
-        //(*logstream) << "RLInterpreter::addCommand($1);\n";
-        (*logstream) << "Add command in RLInterpreter: " << $1 << std::endl;
+        RLInterpreter::addCommand($1);
+        //Add command in RLInterpreter: " << $1->d << std::endl;
     }
     |
     nonreturnable  {
-        (*logstream) << "Add command in RLInterpreter: " << $1 << std::endl;
+        RLInterpreter::addCommand($1);
+        //Add command in RLInterpreter: " << $1->d << std::endl;
     }
     ;
 
@@ -78,131 +96,149 @@ command:
 nonreturnable:
     cycle_condition limited_procedure {
         (*logstream) << "Complite cycle and assign the procedure.\n";
-        $$ = $1;
-        $$ += " after exec ";
-        $$ += $2;
+        //$$->d = $1->d;
+        //$$->d += " after exec ";
+        //$$->d += $2->d;
     }
     |
     OSBRACE returnable ESBRACE OSBRACE PLEASE ESBRACE OSBRACE MARKI ESBRACE SEMICOLON {
-        $$ = "make transition, if ";
-        $$ += $2;
-        $$ += " true";
+        //$$->d = "make transition, if ";
+        //$$->d += $2->d;
+        //$$->d += " true";
+    }
+    |
+    PRINT returnable SEMICOLON {
+        $$ = new RLCommand(show,$2);
     }
     ;
 
 returnable:
     limited_procedure {
-        $$ = $1;
+        //$$->d = $1->d;
     }
     |
     ident ASSIGN returnable {
-        //(*logstream) << "$$ = new RLCommand(assign,$1,$3);\n";
-        $$ = $1;
-        $$ += " = ";
-        $$ += $3;
+        $$ = new RLCommand(assign,$1,$3);
+        //$$->d = $1->d;
+        //$$->d += " = ";
+        //$$->d += $3->d;
     }
     |
     returnable COMPARE returnable {
-        //(*logstream) << "$$ = new RLCommand(compare,$1,$3);\n";
-        $$ = $1;
-        $$ += " == ";
-        $$ += $3;
+        $$ = new RLCommand(compare,$1,$3);
+        //$$->d = $1->d;
+        //$$->d += " == ";
+        //$$->d += $3->d;
     }
     |
     const {
-        $$ = $1;
+        //$$->d = $1->d;
     }
     |
     ident {
-        $$ = $1;
+        //$$->d = $1->d;
     }
     |
     ident INC {
-        $$ = "inc ";
-        $$ += $1;
+        //$$->d = "inc ";
+        //$$->d += $1->d;
+        $$ = new RLCommand(increment,$1);
     }
     |
     ident DEC {
-        $$ = "dec ";
-        $$ += $1;
+        //$$->d = "dec ";
+        //$$->d += $1->d;
+        $$ = new RLCommand(decrement,$1);
     }
     ;
 
 ident:
     BOOLI {
-        //(*logstream) << "if(RLIdentifierRegister::get($1)==NULL)\n";
-        //(*logstream) << "  $$ = new RLDereference(new RLBool(false,$1));\n";
-        //(*logstream) << "else\n";
-        //(*logstream) << "  RLTypePrototype* res = RLIdentifierRegister::get($1);\n";
-        //(*logstream) << "  if(res->getTypeQualifier() != Bool)\n";
-        //(*logstream) << "      drop errror;\n";
-        //(*logstream) << "  else\n";
-        //(*logstream) << "      $$ = new RLDereference(res);\n";
-        $$ = "id ";
-        $$ += &yytext[9];
+        if(RLIdentRegister::get(atoi(&yytext[9]))==NULL)
+          $$ = new RLDereference(new RLBool(false,atoi(&yytext[9])));
+        else {
+          RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
+          if(res->getTypeQualifier() != RLTypePrototype::Bool)
+              throw "ERROR: Expected Bool!";
+          else
+              $$ = new RLDereference(res);
+        }
+        //$$->d = "id ";
+        //$$->d += &yytext[9];
     }
     |
     NUMBI {
-        //(*logstream) << "if(RLIdentifierRegister::get($1)==NULL)\n";
-        //(*logstream) << "  $$ = new RLDereference(new RLNumber(0,$1));\n";
-        //(*logstream) << "else\n";
-        //(*logstream) << "  RLTypePrototype* res = RLIdentifierRegister::get($1);\n";
-        //(*logstream) << "  if(res->getTypeQualifier() != Number)\n";
-        //(*logstream) << "      drop errror;\n";
-        //(*logstream) << "  else\n";
-        //(*logstream) << "      $$ = new RLDereference(res);\n";
-        $$ = "id ";
-        $$ += &yytext[9];
+        if(RLIdentRegister::get(atoi(&yytext[9]))==NULL)
+          $$ = new RLDereference(new RLNumber(0,atoi(&yytext[9])));
+        else {
+          RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
+          if(res->getTypeQualifier() != RLTypePrototype::Number)
+              throw "ERROR: Expected Bool!";
+          else
+              $$ = new RLDereference(res);
+        }
+        //$$->d = "id ";
+        //$$->d += &yytext[9];
     }
     |
     PROCI {
-        //(*logstream) << "if(RLIdentifierRegister::get($1)==NULL)\n";
-        //(*logstream) << "  $$ = new RLDereference(new RLProcedure(false,$1));\n";
-        //(*logstream) << "else\n";
-        //(*logstream) << "  RLTypePrototype* res = RLIdentifierRegister::get($1);\n";
-        //(*logstream) << "  if(res->getTypeQualifier() != Procedure)\n";
-        //(*logstream) << "      drop errror;\n";
-        //(*logstream) << "  else\n";
-        //(*logstream) << "      $$ = new RLDereference(res);\n";
-        $$ = "id ";
-        $$ += &yytext[9];
+        /*
+        if(RLIdentRegister::get(atoi(&yytext[9]))==NULL)
+          $$ = new RLDereference(new RLProcedure(false,atoi(&yytext[9])));
+        else
+          RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
+          if(res->getTypeQualifier() != Procedure)
+              //drop errror;
+          else
+              $$ = new RLDereference(res);
+        */
+        //$$->d = "id ";
+        //$$->d += &yytext[9];
     }
     |
     MARKI {
-        //(*logstream) << "if(RLIdentifierRegister::get($1)==NULL)\n";
-        //(*logstream) << "  $$ = new RLDereference(new RLMark(false,$1));\n";
-        //(*logstream) << "else\n";
-        //(*logstream) << "  RLTypePrototype* res = RLIdentifierRegister::get($1);\n";
-        //(*logstream) << "  if(res->getTypeQualifier() != Bool)\n";
-        //(*logstream) << "      drop errror;\n";
-        //(*logstream) << "  else\n";
-        //(*logstream) << "      $$ = new RLDereference(res);\n";
-        $$ = "set mark on line ";
-        $$ += yylineno;
-        $$ += " with id ";
-        $$ += &yytext[9];
+        /*
+        if(RLIdentRegister::get(atoi(&yytext[9]))==NULL)
+          $$ = new RLDereference(new RLMark(false,atoi(&yytext[9])));
+        else
+          RLTypePrototype* res = RLIdentRegister::get(atoi(&yytext[9]));
+          if(res->getTypeQualifier() != RLTypePrototype::Bool)
+              //drop errror;
+          else
+              $$ = new RLDereference(res);
+        */
+        //$$->d = "set mark on line ";
+        //$$->d += yylineno;
+        //$$->d += " with id ";
+        //$$->d += &yytext[9];
     }
     ;
 
 const:
     BOOLC {
-        //(*logstream) << "$$ = new RLDereference($1)\n";
-        $$ = "bva ";
-        $$ += &yytext[10];
+        bool res;
+        if(yytext[10] == 'T')
+            res = true;
+        else
+            res = false;
+
+        $$ = new RLDereference(new RLBool(res));
+        //$$->d = "bva ";
+        //$$->d += &yytext[10];
     }
     |
     NUMBC {
-        //(*logstream) << "$$ = new RLDereference($1)\n";
-        $$ = "nval ";
-        $$ += &yytext[10];
+        $$ = new RLDereference(new RLNumber(atoi(&yytext[10])));
+        //$$->d = "nval ";
+        //$$->d += &yytext[10];
     }
     ;
 
 cycle_condition:
     OBRACE returnable EBRACE {
         (*logstream) << "Only return the condition, RLCycle will be created higher.\n";
-        $$ = "cycle condition: ";
-        $$ += $2;
+        //$$->d = "cycle condition: ";
+        //$$->d += $2->d;
     }
     ;
 
@@ -210,7 +246,7 @@ cycle_condition:
 limited_procedure:
     start_procedure procedure end_procedure {
         (*logstream) << "Down the stack and return RLProcedure.\n";
-        $$ = "procedure";
+        //$$->d = "procedure";
     }
     ;
 
