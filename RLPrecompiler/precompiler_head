@@ -25,10 +25,17 @@ int main(int argn,const char** arg) {
 
 namespace RLPrecompiler {
 
-std::ostream* logstream;
+std::ofstream* logstream = NULL;
 
-void setPrecompilerOutput(const char* lo) {
-    logstream = new std::fstream("log.tmp",std::ios_base::in);
+void setPrecompilerOutput(std::string lo) {
+    logstream = new std::ofstream(lo.c_str());
+}
+
+std::ostream& getPrecompilerOutput() {
+    if(logstream==NULL)
+        return std::cout;
+    else
+        return *logstream;
 }
 
 using namespace std;

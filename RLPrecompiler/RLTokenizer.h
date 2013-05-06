@@ -1,5 +1,4 @@
-#ifndef RLTOKENIZER_H
-#define RLTOKENIZER_H
+#pragma once
 
 #include <stdio.h>
 #include <iostream>
@@ -18,6 +17,5 @@ extern FILE* token_output;
 
 void Tokenize(FILE* input, FILE* output);
 void Tokenize(const char* input, const char* output);
-}
 
-#endif
+}

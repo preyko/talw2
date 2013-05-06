@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QPoint>
+#include <QTextFormat>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -10,8 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave_RL_file,SIGNAL(triggered()),SLOT(saveRLFile()));
     connect(ui->actionSave_as,SIGNAL(triggered()),SLOT(saveAsRLFile()));
     connect(ui->actionProcess,SIGNAL(triggered()),SLOT(startProcess()));
-
-    connect(ui->codeBrowser,SIGNAL(textChanged()),SLOT(codeChanged()));
 }
 
 void MainWindow::openRLFile() {
@@ -29,11 +30,8 @@ void MainWindow::openRLFile() {
 }
 
 void MainWindow::saveRLFile() {
-    QString code = ui->codeBrowser->toPlainText();
     QFile codeTmp(codeFileName_);
-    codeTmp.open(QIODevice::WriteOnly);
-    codeTmp.write(code.toAscii());
-    codeTmp.close();
+    ui->codeBrowser->writeContent(codeTmp);
 
     ui->statusBar->showMessage(codeFileName_);
 }
@@ -45,13 +43,20 @@ void MainWindow::saveAsRLFile() {
     saveRLFile();
 }
 
+inline void setLineRed(QTextBrowser* tb,int line) {
+    QColor wlc(Qt::red);
+    wlc.setAlpha(50);
+    QTextCharFormat wlf;
+    wlf.setBackground(QBrush(wlc));
+    tb->cursorForPosition(QPoint(0,line)).setCharFormat(wlf);
+}
+
 void MainWindow::startProcess() {
     try {
-        QString code = ui->codeBrowser->toPlainText();
+        ui->codeBrowser->unselectAll();
+
         QFile codeTmp("code.tmp");
-        codeTmp.open(QIODevice::WriteOnly);
-        codeTmp.write(code.toAscii());
-        codeTmp.close();
+        ui->codeBrowser->writeContent(codeTmp);
 
         RLTokenizer::Tokenize("code.tmp","tok.tmp");
 
@@ -73,35 +78,26 @@ void MainWindow::startProcess() {
         fillAppOut_(app_out);
 
     } catch(RLPerformException& exc) {
-        qCritical() << QString(exc.what().c_str());
-    } catch(RLTypeException& exc) {
-        qCritical() << QString(exc.what().c_str());
+        ui->applicationOutput->append(tr("Run-time error:") +
+                                      QString::number(exc.whatLine()) +
+                                      tr(":") +
+                                      QString(exc.what().c_str()));
+
+        ui->codeBrowser->selectLine(exc.whatLine());
+
     } catch(RLPrecompiler::Exception& exc) {
-        qCritical() << "Syntax error on line #" << exc.whatLine() << ":" << QString(exc.what().c_str());
+        ui->precompilerLog->append(tr("Precompile error:") +
+                                      QString::number(exc.whatLine()) +
+                                      tr(":") +
+                                      QString(exc.what().c_str()));
+
+        ui->codeBrowser->selectLine(exc.whatLine());
     }
 }
 
 void MainWindow::fillCode_(QFile& source) {
     ui->codeBrowser->clear();
-
-    source.open(QIODevice::ReadOnly | QIODevice::Text);
-
-    if(!source.exists()) {
-        QMessageBox mb(this);
-        mb.setText("Such file doesn't exist.");
-        mb.setDefaultButton(QMessageBox::Ok);
-        mb.show();
-    }
-
-    int linen = 0;
-    while(!source.atEnd()) {
-        QString res = source.readLine();
-        ui->codeBrowser->append(//QString::number(linen++) +
-                                //tr(" ") +
-                                res.remove(res.length()-1,1));
-    }
-
-    source.close();
+    ui->codeBrowser->readContent(source);
 }
 
 void MainWindow::fillTO_(QFile& source) {

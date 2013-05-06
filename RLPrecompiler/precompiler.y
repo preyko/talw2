@@ -32,11 +32,11 @@ extern int yywrap(void);
 extern int yylex(void);
 
 void yyerror(const char* str) {
-        (*logstream) << "Error on line " << yylineno << ": " << str << std::endl;
+        throw Exception(std::string(str),yylineno);
 }
 
 int yywrap() {
-        return 0;
+        return 1;
 }
 
 void Precompiler(const char* token_input) {
@@ -46,19 +46,19 @@ void Precompiler(const char* token_input) {
         throw Exception(std::string("Can't open file called ") +
                         std::string(token_input));
 
-    if(logstream == NULL)
-        logstream = &std::cout;
-
     yydebug = 1;
+    yylineno = 1;
 
     do {
         yyparse();
     } while(!feof(yyin));
 
-    if(logstream != NULL && logstream != &std::cout) {
-        ((std::fstream*)logstream)->close();
-        delete logstream;
+    if(logstream != NULL) {
+        logstream->close();
+        delete logstream; logstream = NULL;
     }
+
+    fclose(yyin);
 }
 
 %}
@@ -68,6 +68,7 @@ void Precompiler(const char* token_input) {
 BOOLI NUMBI MARKI PROCI // IDENTIFIER
 BOOLC NUMBC // CONSTANT
 ASSIGN COMPARE INC DEC LINK RLINK NOR  // OPERATORS
+IF
 PRINT PLEASE
 EOf
 
@@ -84,11 +85,13 @@ procedure:
 
 line:
     command SEMICOLON {
+        $1->setLinePosition(yylineno);
         RLInterpreter::addCommand($1);
         //Add command in RLInterpreter: " << $1->d << std::endl;
     }
     |
     nonreturnable  {
+        $1->setLinePosition(yylineno);
         RLInterpreter::addCommand($1);
         //Add command in RLInterpreter: " << $1->d << std::endl;
     }
@@ -99,11 +102,20 @@ command:
     ;
 
 nonreturnable:
-    cycle_condition limited_procedure {
-        (*logstream) << "Complite cycle and assign the procedure.\n";
+    rcondition limited_procedure {
+        getPrecompilerOutput() << "Complite cycle and assign the procedure.\n";
         //$$->d = $1->d;
         //$$->d += " after exec ";
         //$$->d += $2->d;
+        $$ = new RLCycle($2,$1);
+    }
+    |
+    IF rcondition limited_procedure {
+        getPrecompilerOutput() << "Complite condition and assign the procedure.\n";
+        //$$->d = $1->d;
+        //$$->d += " after exec ";
+        //$$->d += $2->d;
+        $$ = new RLConditional($2,$1);
     }
     |
     OSBRACE returnable ESBRACE OSBRACE PLEASE ESBRACE OSBRACE MARKI ESBRACE SEMICOLON {
@@ -138,10 +150,12 @@ returnable:
     |
     const {
         //$$->d = $1->d;
+        $$ = $1;
     }
     |
     ident {
         //$$->d = $1->d;
+        $$ = $1;
     }
     |
     ident INC {
@@ -239,25 +253,30 @@ const:
     }
     ;
 
-cycle_condition:
+rcondition:
     OBRACE returnable EBRACE {
-        (*logstream) << "Only return the condition, RLCycle will be created higher.\n";
+        getPrecompilerOutput() << "Only return the condition, RLCycle will be created higher.\n";
         //$$->d = "cycle condition: ";
         //$$->d += $2->d;
+        $$ = $2;
     }
     ;
 
 
 limited_procedure:
     start_procedure procedure end_procedure {
-        (*logstream) << "Down the stack and return RLProcedure.\n";
+        getPrecompilerOutput() << "Down the stack and return RLProcedure.\n";
+        $$ = new RLCommand(perform,
+        RLInterpreter::getCurrentFunction());
+        RLInterpreter::downStack();
         //$$->d = "procedure";
     }
     ;
 
 start_procedure:
     OFBRACE {
-        (*logstream) << "Up the stack.\n";
+        getPrecompilerOutput() << "Up the stack.\n";
+        RLInterpreter::upStack();
     }
     ;
 end_procedure:

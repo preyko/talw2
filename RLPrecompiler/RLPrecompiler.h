@@ -1,5 +1,4 @@
-#ifndef RLPRECOMPILER_H
-#define RLPRECOMPILER_H
+#pragma once
 
 #include <iostream>
 #include <fstream>
@@ -28,10 +27,11 @@ private:
 };
 
 extern FILE* yyin;
-extern std::ostream* logstream;
+extern std::ofstream* logstream;
 
 void Precompiler(const char* token_input);
-void setPrecompilerOutput(const char* lo);
+
+std::ostream& getPrecompilerOutput();
+void setPrecompilerOutput(std::string lo);
 
 }
-#endif

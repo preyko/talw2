@@ -11,11 +11,14 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    rlcodebrowser.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    rlcodebrowser.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    rlcodebrowser.ui
 
 symbian: LIBS += -lrlprecomp
 else:unix|win32: LIBS += -L$$PWD/../../RLPrecompiler/build/ -lrlprecomp

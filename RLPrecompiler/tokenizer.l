@@ -33,6 +33,8 @@ eq                      fprintf(token_output,"COMPARE ");
 
 \.\#[0-9]+              fprintf(token_output,"BOOLI,id=%s NOR ",&yytext[2]);
 
+\|                      fprintf(token_output,"IF ");
+
 please                  fprintf(token_output,"PLEASE ");
 
 \@                      fprintf(token_output,"LINK ");

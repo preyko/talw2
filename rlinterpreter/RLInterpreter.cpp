@@ -18,7 +18,10 @@ void RLInterpreter::Perform() {
     else
         mainProc_->exec();
 
-    outputStream_->close();
+    if(outputStream_ != NULL) {
+        outputStream_->close();
+        delete outputStream_; outputStream_ = NULL;
+    }
 }
 
 RLProcedure* RLInterpreter::getMainFunction() {
@@ -34,6 +37,9 @@ void RLInterpreter::addCommand(RLCommandPrototype* c) {
 }
 
 void RLInterpreter::upStack(RLProcedure* u) {
+    if(u==NULL)
+        u = new RLProcedure();
+
     stack_.push_back(u);
 }
 
