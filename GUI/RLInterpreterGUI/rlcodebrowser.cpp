@@ -9,10 +9,10 @@ RLCodeBrowser::RLCodeBrowser(QWidget *parent) :
     ui->setupUi(this);
 
     ui->lineViewer->installEventFilter(this);
+    ui->scroll->installEventFilter(this);
 
     //connect(ui->scroll,SIGNAL(valueChanged(int)),ui->codeBrowser->verticalScrollBar(),SLOT(setValue(int)));
     //connect(ui->scroll,SIGNAL(valueChanged(int)),ui->lineViewer->verticalScrollBar(),SLOT(setValue(int)));
-    connect(ui->codeBrowser->verticalScrollBar(),SIGNAL(rangeChanged(int,int)),SLOT(rangeChanged(int,int)));
     connect(ui->codeBrowser,SIGNAL(textChanged()),SLOT(lineNumberChanged()));
 
     connect(ui->scroll,SIGNAL(sliderPressed()),SLOT(scrollBarActivate()));
@@ -20,8 +20,6 @@ RLCodeBrowser::RLCodeBrowser(QWidget *parent) :
 
     connect(ui->scroll,SIGNAL(valueChanged(int)),SLOT(scrollBySlider(int)));
     connect(ui->codeBrowser->verticalScrollBar(),SIGNAL(valueChanged(int)),SLOT(scrollByCb(int)));
-
-    rangeChanged(ui->codeBrowser->verticalScrollBar()->minimum(),ui->codeBrowser->verticalScrollBar()->maximum());
 
     scrollBarActive_ = false;
 
@@ -49,6 +47,12 @@ void RLCodeBrowser::clear() {
 }
 
 bool RLCodeBrowser::eventFilter(QObject* target, QEvent* ev) {
+    if(target == ui->scroll && ev->type()==QEvent::Wheel) {
+        int val = ui->scroll->value();
+        ui->lineViewer->verticalScrollBar()->setValue(val);
+        ui->codeBrowser->verticalScrollBar()->setValue(val);
+        return false;
+    }
     return false;
 }
 
@@ -71,7 +75,7 @@ void RLCodeBrowser::selectLine(int line, QColor color) {
     new_format.setBackground(QBrush(color));
 
     cursor.movePosition(QTextCursor::Start);
-    cursor.movePosition(QTextCursor::Down,QTextCursor::MoveAnchor,line);
+    cursor.movePosition(QTextCursor::Down,QTextCursor::MoveAnchor,line-1);
     cursor.setBlockFormat(new_format);
 
     ui->codeBrowser->setTextCursor(cursor);
@@ -79,17 +83,18 @@ void RLCodeBrowser::selectLine(int line, QColor color) {
     selectedPositions_.push_back(cursor);
 }
 
-void RLCodeBrowser::rangeChanged(int min,int max) {
-    ui->scroll->setRange(min,max);
-    ui->lineViewer->verticalScrollBar()->setRange(min,max);
-}
-
 void RLCodeBrowser::lineNumberChanged() {
-    int codeLines = ui->codeBrowser->toPlainText().count(QChar('\n'))+1;
+    int res = ui->codeBrowser->toPlainText().count(QChar('\n'))+1;
 
-    ui->lineViewer->clear();
-    for(int i=1;i<=codeLines;i++) {
-        ui->lineViewer->append(QString::number(i));
+    if(currentLineCount_ != res) {
+        currentLineCount_ = res;
+
+        ui->lineViewer->clear();
+        for(int i=1;i<=currentLineCount_;i++) {
+            ui->lineViewer->append(QString::number(i));
+        }
+
+        ui->scroll->setRange(0,currentLineCount_);
     }
 }
 
@@ -102,19 +107,21 @@ void RLCodeBrowser::scrollBarDesctivate() {
 }
 
 void RLCodeBrowser::scrollBySlider(int val) {
-    //qDebug() << "By slider:" << val;
-
     if(!scrollBarActive_) return;
 
-    ui->lineViewer->verticalScrollBar()->setValue(val);
-    ui->codeBrowser->verticalScrollBar()->setValue(val);
+    int cval = double(val)*(ui->codeBrowser->verticalScrollBar()->maximum()-
+                            ui->codeBrowser->verticalScrollBar()->minimum())/currentLineCount_;
+
+    ui->lineViewer->verticalScrollBar()->setValue(cval);
+    ui->codeBrowser->verticalScrollBar()->setValue(cval);
 }
 
 void RLCodeBrowser::scrollByCb(int val) {
-    //qDebug() << "By code browser:" << val;
-
     if(scrollBarActive_) return;
 
+    int cval = double(val)/(ui->codeBrowser->verticalScrollBar()->maximum()-
+                            ui->codeBrowser->verticalScrollBar()->minimum())*currentLineCount_;
+
     ui->lineViewer->verticalScrollBar()->setValue(val);
-    ui->scroll->setValue(val);
+    ui->scroll->setValue(cval);
 }

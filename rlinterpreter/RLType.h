@@ -2,10 +2,14 @@
 
 #include <iostream>
 #include <string>
+
+#include <algorithm>
 #include <vector>
 #include <map>
 
-
+/*
+ * RLTypeException: Exception that describe errors with RLTypes in run time.
+ */
 class RLTypeException {
 public:
     RLTypeException(std::string descr) {
@@ -20,7 +24,13 @@ private:
     std::string description_;
 };
 
-enum RLOperator { show, np, increment, decrement, assign, compare, arrayat, maketransition, perform };
+/* Aviabale operators */
+enum RLOperator { show, np, increment, decrement, assign, compare, arrayat, maketransition, perform, bind, unbind };
+
+
+/*
+ * RLIdentRegister: Reestr of identifier that keep variables.
+ */
 
 /* Solution to the crosslinks problem */
 class RLTypePrototype;
@@ -40,6 +50,11 @@ private:
     static IdentifierRegister register_;
 };
 
+
+/*
+ * RLTypePrototype: Base type for each other RLType.
+ */
+class RLProcedure;
 class RLTypePrototype {
 public:
     typedef std::vector<RLTypePrototype*> LinkCounter;
@@ -50,8 +65,15 @@ public:
 		RLTypeQualifier typeName;	
 	};
 
-    static void killThemAll();
+    /* This members provide protection of memory leak */
+    static void clearTempVars();
+    static void clearConstVars();
+    static void killThemAll(); // Clear IdentRegister and Constant variables.
+    RLTypePrototype* markAsTemp();
+    RLTypePrototype* markAsConst();
+
     static std::string typeName(RLTypeQualifier qualifier);
+
 
     RLTypePrototype();
 
@@ -59,17 +81,24 @@ public:
 
     virtual RLTypePrototype* copy() const;
 
-    virtual RLTypePrototype* applyUnary(RLOperator);
-    virtual RLTypePrototype* applyBinary(RLOperator, RLTypePrototype*);
+    virtual RLTypePrototype* applyUnary(RLOperator oper);
+    virtual RLTypePrototype* applyBinary(RLOperator oper, RLTypePrototype* val);
 
     RLTypeQualifier getTypeQualifier() const;
 
     virtual void print();
 
+    bool linkWithProcedure(RLProcedure* proc);
+    bool breakLinkWithProcedure(RLProcedure* proc);
+
 protected:
     RLTypeMeta meta_;
 
-    static LinkCounter linkCounter_;
+private:
+    std::vector<RLProcedure*> linkedProcedures_;
+
+    static LinkCounter tempVars_;
+    static LinkCounter constVars_;
 };
 
 class RLBool : public RLTypePrototype {
@@ -126,7 +155,6 @@ public:
 
     virtual RLTypePrototype* copy() const;
 
-    void setElem(int pos, RLTypePrototype* element);
     RLTypePrototype* getElem(int pos) const;
 
     RLTypeQualifier getElemQualifier() const;
@@ -144,8 +172,16 @@ private:
     void init_(RLTypeQualifier qualifier);
 };
 
-class RLProcedure;
 class RLMark : public RLTypePrototype {
+public:
+
+    static const int MaxTransactionCount_ = 255;
+
+    struct TransactionDescriptor {
+        RLProcedure* dawnPerformStackTo;
+        int goToLine;
+    };
+
     RLMark(RLTypePrototype* owner, int line);
     RLMark(RLTypePrototype* owner, int line, int id);
 
@@ -160,8 +196,9 @@ class RLMark : public RLTypePrototype {
     virtual void print();
 
 protected:
-    int linePointer_;
+    int transactionCount_;
 
+    int linePointer_;
     RLProcedure* owner_;
 
 private:
@@ -171,6 +208,7 @@ private:
 
 class RLCommandPrototype;
 class RLProcedure : public RLTypePrototype {
+    friend class RLTypePrototype;
 public:
     typedef std::vector<RLCommandPrototype*> RLCommandChain;
 
@@ -183,6 +221,8 @@ public:
     void addCommand(RLCommandPrototype* c);
 
     void setLinePointer(int nline);
+
+    int getSize() const;
 
     void exec();
 
@@ -201,7 +241,6 @@ private:
     void init_();
     void exec_();
     void clear_();
-};
 
-template<class T>
-T RLcast(RLTypePrototype* type);
+    RLProcedure* referenceTo_;
+};

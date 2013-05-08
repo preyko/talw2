@@ -25,6 +25,8 @@ int main(int argn,const char** arg) {
 
 namespace RLPrecompiler {
 
+Exceptions collectionerOfExceptions = Exceptions();
+
 std::ofstream* logstream = NULL;
 
 void setPrecompilerOutput(std::string lo) {

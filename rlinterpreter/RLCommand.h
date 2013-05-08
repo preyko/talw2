@@ -29,8 +29,6 @@ class RLCommandPrototype {
     friend class RLProcedure;
 
 public:
-    enum RLCommandType { Base, Dereference, Usual, Conditional };
-
     virtual RLCommandPrototype* copy() const = 0;
 
     virtual RLTypePrototype* exec() const = 0;
@@ -39,9 +37,6 @@ public:
 
     void setLinePosition(int line);
     int getLinePosition();
-
-protected:
-    RLCommandType commandType_;
 
 private:
     int linePosition_;

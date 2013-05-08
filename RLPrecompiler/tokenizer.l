@@ -12,7 +12,11 @@
 RLNAMESPACE_BEGIN
 FILE* token_output;
 }
+
+%x LINE_COMMENT MULTILINE_COMMENT
 %%
+<INITIAL>
+{
 	/* Constants */
 T|F                     fprintf(token_output,"BOOLC,val=%s ",yytext);
 [0-9]+                  fprintf(token_output,"NUMBC,val=%s ",yytext);
@@ -58,6 +62,23 @@ print                   fprintf(token_output,"PRINT ");
 
     /* ERRTOKEN */
  .                      fprintf(token_output,"ERRTOKEN '%s' on line #%d. ",yytext,yylineno);
+
+    /* Commentaries */
+\/\/                    BEGIN(LINE_COMMENT);
+\/\*                    BEGIN(MULTILINE_COMMENT);
+}
+
+<LINE_COMMENT>
+{
+.                       // Skip all, except end of line
+\n                      BEGIN(INITIAL);
+}
+
+<MULTILINE_COMMENT>
+{
+.                       // Skip all, except '/*'
+\*\/                    BEGIN(INITIAL);
+}
 
 %%
 RLNAMESPACE_END

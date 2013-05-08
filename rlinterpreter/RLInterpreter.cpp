@@ -7,12 +7,14 @@ RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFuncti
 void RLInterpreter::Initialization() {
     RLTypePrototype::killThemAll();
 
-    mainProc_ = new RLProcedure(-1);
+    mainProc_ = (RLProcedure*)((new RLProcedure(-1))->markAsConst());
 
     stack_.push_back(mainProc_);
 }
 
 void RLInterpreter::Perform() {
+    unlockLinkProcedurePerforming();
+
     if(mainProc_==NULL)
         throw RLPerformException(std::string("You should call RLInterpreter::Initialization() before."),0);
     else
@@ -33,7 +35,8 @@ RLProcedure* RLInterpreter::getCurrentFunction() {
 }
 
 void RLInterpreter::addCommand(RLCommandPrototype* c) {
-    getCurrentFunction()->addCommand(c);
+    if(c!=NULL)
+        getCurrentFunction()->addCommand(c);
 }
 
 void RLInterpreter::upStack(RLProcedure* u) {
@@ -60,4 +63,15 @@ std::ostream& RLInterpreter::getApplicationOutput() {
         return *outputStream_;
     else
         return std::cout;
+}
+
+bool RLInterpreter::performingLinkProcedureLocked_ = false;
+bool RLInterpreter::isPerformingLinkProcedureLocked() {
+    return performingLinkProcedureLocked_;
+}
+void RLInterpreter::lockLinkProcedurePerforming() {
+    performingLinkProcedureLocked_ = true;
+}
+void RLInterpreter::unlockLinkProcedurePerforming() {
+    performingLinkProcedureLocked_ = false;
 }

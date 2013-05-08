@@ -74,7 +74,7 @@
         <property name="movable">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="tab_3">
+        <widget class="QWidget" name="tokenOutputTab">
          <attribute name="title">
           <string>Token output</string>
          </attribute>
@@ -97,7 +97,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="precompilerOutputTab">
          <property name="styleSheet">
           <string notr="true">#padding: 0px</string>
          </property>
@@ -132,7 +132,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="programOutputTab">
          <attribute name="title">
           <string>Program output</string>
          </attribute>

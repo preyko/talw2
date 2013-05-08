@@ -65,6 +65,10 @@ NOR                             {
 
 }
 
+IF                              {
+    return IF;
+}
+
 PLEASE                          {
 
     return PLEASE;

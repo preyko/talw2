@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <vector>
+
 namespace RLPrecompiler {
 
 class Exception {
@@ -23,6 +25,31 @@ public:
 private:
     int linePosition_;
     std::string description_;
+
+};
+
+class Exceptions {
+public:
+    typedef std::vector<Exception> Collectioner;
+
+    void add(Exception exc) {
+        collectionerException_.push_back(exc);
+    }
+
+    void clear() {
+        collectionerException_.clear();
+    }
+
+    bool isEmpty() {
+        return collectionerException_.size() == 0;
+    }
+
+    Collectioner& getCollectioner() {
+        return collectionerException_;
+    }
+
+private:
+    std::vector<Exception> collectionerException_;
 
 };
 

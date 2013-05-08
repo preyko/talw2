@@ -59,4 +59,13 @@ private:
     bool codeNotChanged_;
 };
 
+
+/*
+class RLStreamConnector : public QObject, public std::ostream {
+    Q_OBJECT
+public:
+
+};
+*/
+
 #endif // MAINWINDOW_H

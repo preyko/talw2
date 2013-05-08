@@ -19,6 +19,12 @@
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
   </property>
+  <property name="frameShadow">
+   <enum>QFrame::Sunken</enum>
+  </property>
+  <property name="midLineWidth">
+   <number>1</number>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="margin">
     <number>0</number>
@@ -43,7 +49,8 @@
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">background:rgb(212, 212, 212)</string>
+        <string notr="true">background:rgb(212, 212, 212);
+font: 11pt &quot;Ubuntu Mono&quot;;</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
@@ -65,7 +72,7 @@
         <cursorShape>IBeamCursor</cursorShape>
        </property>
        <property name="styleSheet">
-        <string notr="true"/>
+        <string notr="true">font: 11pt &quot;Ubuntu Mono&quot;;</string>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>

@@ -34,7 +34,6 @@ public:
     void selectLine(int line, QColor color = QColor(Qt::red));
 
 public slots:
-    void rangeChanged(int min,int max);
     void lineNumberChanged();
 
     void scrollBarActivate();
@@ -46,6 +45,7 @@ public slots:
 private:
     Ui::RLCodeBrowser *ui;
 
+    int currentLineCount_;
     bool scrollBarActive_;
 
     QVector<QTextCursor> selectedPositions_;

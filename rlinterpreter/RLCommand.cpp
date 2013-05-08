@@ -43,7 +43,7 @@ RLCommandPrototype* RLDereference::copy() const {
 }
 
 RLTypePrototype* RLDereference::exec() const {
-    return value_;
+    return value_; //->applyUnary(np);
 }
 
 void RLDereference::print() const {
@@ -104,7 +104,7 @@ void RLCommand::print() const {
 
 RLTypePrototype* RLCommand::exec_() const {
     if(first_==NULL && second_==NULL) {
-        return new RLBool(false);
+        return (new RLBool(false))->markAsTemp();
     } else if(first_!=NULL && second_==NULL) {
         return first_->exec()->applyUnary(operator_);
     } else {
@@ -117,7 +117,7 @@ RLTypePrototype* RLCommand::exec_() const {
  * class RLConditional : public RLCommandBase
  */
 RLConditional::RLConditional(RLCommandPrototype* effectcode, RLCommandPrototype* condition) {
-    Truth_ = new RLBool(true);
+    Truth_ = (new RLBool(true))->markAsConst();
 
     condition_ = new RLCommand(compare,condition,new RLDereference(Truth_));
 
@@ -138,7 +138,7 @@ RLTypePrototype* RLConditional::exec() const {
     if(accept)
         exec_();
 
-    return new RLBool(accept);
+    return (new RLBool(accept))->markAsTemp();
 }
 
 void RLConditional::print() const {
@@ -172,11 +172,11 @@ RLTypePrototype* RLCycle::exec() const {
         exec_();
 
         if(i++ > MaxCycleIteration_) {
-            return new RLBool(false);
+            return (new RLBool(false))->markAsTemp();
         }
     }
 
-    return new RLBool(true);
+    return (new RLBool(true))->markAsTemp();
 }
 
 RLCommandPrototype* RLCycle::copy() const {

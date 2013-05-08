@@ -25,11 +25,18 @@ public:
     static void setApplicationOutput(std::string file_name);
     static std::ostream& getApplicationOutput();
 
+
+    static bool isPerformingLinkProcedureLocked();
+    static void lockLinkProcedurePerforming();
+    static void unlockLinkProcedurePerforming();
+
 private:
     static RLProcedure* mainProc_;
 
     static StackFunctions stack_;
 
     static std::ofstream* outputStream_;
+
+    static bool performingLinkProcedureLocked_;
 
 };

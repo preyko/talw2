@@ -77,6 +77,7 @@ void MainWindow::startProcess() {
         QFile app_out("appout.tmp");
         fillAppOut_(app_out);
 
+        ui->tabWidget->setCurrentWidget(ui->programOutputTab);
     } catch(RLPerformException& exc) {
         ui->applicationOutput->append(tr("Run-time error:") +
                                       QString::number(exc.whatLine()) +
@@ -85,13 +86,18 @@ void MainWindow::startProcess() {
 
         ui->codeBrowser->selectLine(exc.whatLine());
 
-    } catch(RLPrecompiler::Exception& exc) {
-        ui->precompilerLog->append(tr("Precompile error:") +
-                                      QString::number(exc.whatLine()) +
-                                      tr(":") +
-                                      QString(exc.what().c_str()));
+    } catch(RLPrecompiler::Exceptions& exc) {
+        for(int i=0;i<exc.getCollectioner().size();i++) {
+            RLPrecompiler::Exception* exception = &exc.getCollectioner()[i];
 
-        ui->codeBrowser->selectLine(exc.whatLine());
+            ui->precompilerLog->append(tr("Precompile error:") +
+                                          QString::number(exception->whatLine()) +
+                                          tr(":") +
+                                          QString(exception->what().c_str()));
+
+            ui->codeBrowser->selectLine(exception->whatLine());
+        }
+        ui->tabWidget->setCurrentWidget(ui->precompilerOutputTab);
     }
 }
 
