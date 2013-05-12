@@ -50,6 +50,7 @@ public:
     static RLTypePrototype* get(int id);
 
     static void clear();
+    static void showAll();
 
 private:
     static IdentifierRegister register_;
@@ -72,9 +73,11 @@ public:
     /* This members provide protection of memory leak */
     static void clearTempVars();
     static void clearConstVars();
+    static void clearDynamicallyAllocatedVars();
     static void killThemAll(); // Clear IdentRegister and Constant variables.
     RLTypePrototype* markAsTemp();
     RLTypePrototype* markAsConst();
+    RLTypePrototype* markAsDynamicallyAllocated();
 
     static std::string typeName(RLTypeQualifier qualifier);
 
@@ -104,6 +107,7 @@ private:
 
     static LinkCounter tempVars_;
     static LinkCounter constVars_;
+    static LinkCounter dynamicVars_;
 };
 
 class RLBool : public RLTypePrototype {
@@ -155,11 +159,9 @@ public:
     typedef std::map<int, RLTypePrototype*> RLArrayStorage;
     typedef std::pair<int, RLTypePrototype*> RLArrayStoragePair;
 
-    RLArray(RLTypeQualifier qualifier);
-    RLArray(RLTypeQualifier qualifier, int key);
-
     RLArray(int depth, RLTypeQualifier rootqualifier);
     RLArray(int depth, RLTypeQualifier rootqualifier,int id);
+    ~RLArray();
 
     virtual RLTypePrototype* copy() const;
 
@@ -171,6 +173,8 @@ public:
     
     RLTypeQualifier getRootQualifier() const;
     void setRootQualifier(RLTypeQualifier qual);
+    
+    void clear();
 
     virtual RLTypePrototype* applyUnary(RLOperator oper);
     virtual RLTypePrototype* applyBinary(RLOperator oper, RLTypePrototype* val);
@@ -178,8 +182,10 @@ public:
     virtual void print();
 
 private:
-    void init_(RLTypeQualifier qualifier);
+    void init_(int depth, RLTypeQualifier rootqualifier);
 
+    void print_(std::string delimetr = "");
+    
     int currentRootDepth_;
     RLTypeQualifier rootType_;
     

@@ -21,6 +21,10 @@ void RLInterpreter::Perform() {
     else
         mainProc_->exec();
     
+    RLTypePrototype::clearTempVars();
+    RLTypePrototype::clearConstVars();
+    RLTypePrototype::clearDynamicallyAllocatedVars();
+    
     if(outputStreamOpenedHere_) {
         std::ofstream* outfstream = dynamic_cast<std::ofstream*>(outputStream_);
         if(outfstream != NULL) {

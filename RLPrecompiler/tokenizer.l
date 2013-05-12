@@ -31,12 +31,14 @@ void setTokenizerOutput(std::string filename) {
     streamOpenedHere_ = true;
     tokenOutput_ = new std::ofstream(filename.c_str());
 }
+
+Exceptions exceptions_;
 }
 
 RLNAMESPACE_BEGIN
 }
 
-%x LINE_COMMENT MULTILINE_COMMENT
+%x LINE_COMMENT MULTILINE_COMMENT ERRTOKEN
 %%
 <INITIAL>
 {
@@ -68,6 +70,7 @@ please                  getTokenizerOutput() << "PLEASE ";
 \%                      getTokenizerOutput() << "RLINK ";
 
 print                   getTokenizerOutput() << "PRINT ";
+printall                getTokenizerOutput() << "PRINTALL ";
 
 
 
@@ -84,22 +87,29 @@ print                   getTokenizerOutput() << "PRINT ";
 [ \t]+                  getTokenizerOutput() << " ";
 
     /* ERRTOKEN */
- .                      getTokenizerOutput() << "ERRTOKEN '" << yytext << "' on line #" << yylineno;
+.                       exceptions_.add(Exception(yytext,yylineno)); BEGIN(ERRTOKEN);
 
     /* Commentaries */
 \/\/                    BEGIN(LINE_COMMENT);
-\/\*                    BEGIN(MULTILINE_COMMENT);
+    /*\/\*                    BEGIN(MULTILINE_COMMENT);*/
+}
+
+<ERRTOKEN>
+{
+[ ]                     BEGIN(INITIAL);
+.                       exceptions_.getLast().what() += yytext;
 }
 
 <LINE_COMMENT>
 {
 .                       // Skip all, except end of line
-\n                      BEGIN(INITIAL);
+\n                      yylineno++; BEGIN(INITIAL);
 }
 
 <MULTILINE_COMMENT>
 {
 .                       // Skip all, except '/*'
+\n                      yylineno++;
 \*\/                    BEGIN(INITIAL);
 }
 
@@ -115,6 +125,8 @@ void Tokenize(const char* input) {
         throw Exception(std::string("Can't open file called ") +
                         std::string(input));
 
+    exceptions_.clear();
+    
     do {
         yylex();
     } while(!feof(yyin));
@@ -134,6 +146,9 @@ void Tokenize(const char* input) {
     }
 
     fclose(yyin);
+    
+    if(!exceptions_.isEmpty())
+        throw exceptions_;
 }
 }
 

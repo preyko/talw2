@@ -136,3 +136,11 @@ private:
     static const int MaxCycleIteration_ = 250;
 
 };
+
+// Debug
+class RLPrintAll : public RLCommandPrototype {
+public:
+    virtual RLCommandPrototype* copy() const;
+
+    virtual RLTypePrototype* exec() const;    
+};

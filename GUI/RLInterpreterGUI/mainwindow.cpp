@@ -10,6 +10,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave_RL_file,SIGNAL(triggered()),SLOT(saveRLFile()));
     connect(ui->actionSave_as,SIGNAL(triggered()),SLOT(saveAsRLFile()));
     connect(ui->actionProcess,SIGNAL(triggered()),SLOT(startProcess()));
+    
+    connect(ui->codeBrowser,SIGNAL(codeChanged()),SLOT(codeChanged()));
+    
+    setTitle();
 }
 
 void MainWindow::openRLFile() {
@@ -19,19 +23,18 @@ void MainWindow::openRLFile() {
                                                     tr("RLCode file (*.rl)"));
     if(filename.isEmpty()) return;
 
-    QFile rl_file(filename);
-    fillCode_(rl_file);
-
+    QFile code(filename);
+    ui->codeBrowser->readContent(code);
     codeFileName_ = filename;
 	
-    ui->statusBar->showMessage(codeFileName_);
+    setTitle(codeFileName_);
 }
 
 void MainWindow::saveRLFile() {
     QFile codeTmp(codeFileName_);
     ui->codeBrowser->writeContent(codeTmp);
 
-    ui->statusBar->showMessage(codeFileName_);
+    setTitle(codeFileName_);
 }
 
 void MainWindow::saveAsRLFile() {
@@ -89,7 +92,20 @@ void MainWindow::startProcess() {
 
             RLPrecompiler::getPrecompilerOutput() << "Precompile error:"
                                                   << exception->whatLine()
-                                                  << ":" 
+                                                  << " : " 
+                                                  << exception->what().c_str()
+												  << std::endl;
+
+            ui->codeBrowser->selectLine(exception->whatLine());
+        }
+        ui->tabWidget->setCurrentWidget(ui->precompilerOutputTab);
+    } catch(RLTokenizer::Exceptions& exc) {
+        for(uint i=0;i<exc.getCollectioner().size();i++) {
+            RLTokenizer::Exception* exception = &exc.getCollectioner()[i];
+
+            RLPrecompiler::getPrecompilerOutput() << "Unexpected token:"
+                                                  << exception->whatLine()
+                                                  << " : " 
                                                   << exception->what().c_str()
 												  << std::endl;
 
@@ -103,70 +119,22 @@ void MainWindow::startProcess() {
 	//disconnect(&apo,SIGNAL(sendInterceptedData(QString)),ui->applicationOutput,SLOT(append(QString)));
 }
 
-void MainWindow::fillCode_(QFile& source) {
-    ui->codeBrowser->clear();
-    ui->codeBrowser->readContent(source);
-}
-
-void MainWindow::fillTO_(QFile& source) {
-    ui->tokenOutput->clear();
-
-    source.open(QIODevice::ReadOnly | QIODevice::Text);
-
-    if(!source.exists()) {
-        QMessageBox mb(this);
-        mb.setText("Such file doesn't exist.");
-        mb.setDefaultButton(QMessageBox::Ok);
-        mb.show();
-    }
-
-    while(!source.atEnd())
-        ui->tokenOutput->append(source.readAll());
-
-    source.close();
-}
-
-void MainWindow::fillLog_(QFile& source) {
-    ui->precompilerOutput->clear();
-
-    source.open(QIODevice::ReadOnly);
-
-    if(!source.exists()) {
-        QMessageBox mb(this);
-        mb.setText("Such file doesn't exist.");
-        mb.setDefaultButton(QMessageBox::Ok);
-        mb.show();
-    }
-
-    while(!source.atEnd())
-        ui->precompilerOutput->append(source.readAll());
-
-    source.close();
-}
-
-void MainWindow::fillAppOut_(QFile& source) {
-    ui->applicationOutput->clear();
-
-    source.open(QIODevice::ReadOnly);
-
-    if(!source.exists()) {
-        QMessageBox mb(this);
-        mb.setText("Such file doesn't exist.");
-        mb.setDefaultButton(QMessageBox::Ok);
-        mb.show();
-    }
-
-    while(!source.atEnd())
-        ui->applicationOutput->append(source.readAll());
-
-    source.close();
-}
-
 void MainWindow::codeChanged() {
     codeNotChanged_ = false;
 
-    statusBar()->showMessage(codeFileName_ +
-                   tr("*"));
+    setTitle(codeFileName_ +
+             tr("*"));
+}
+
+void MainWindow::setTitle(QString title) {
+    QString t = "RLInterpreter";
+    
+    if(!title.isEmpty()) {
+        t += " - ";
+        t += title;
+    }
+    
+    setWindowTitle(t);
 }
 
 

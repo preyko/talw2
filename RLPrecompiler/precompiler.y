@@ -35,7 +35,7 @@ void Precompile(const char* token_input) {
     #elseif
     yydebug = 0;
     #endif
-    //yydebug = 1;
+    yydebug = 1;
     
     RLInterpreter::Initialization();
 
@@ -67,7 +67,7 @@ struct ArrayInfo {
     RLTypePrototype::RLTypeQualifier rootType;
 };
 
-ArrayInfo arrayInfo_;
+ArrayInfo arrayInfo_{0,NULL,RLTypePrototype::Number};
 
 %}
 
@@ -79,8 +79,8 @@ BOOLARRAY NUMBARRAY PROCARRAY // ARRAYS
 BOOLC NUMBC // CONSTANT
 ASSIGN COMPARE INC DEC LINK RLINK NOR  // OPERATORS
 IF
-PRINT PLEASE
-EOf
+PRINT PRINTALL PLEASE
+EOC
 
 %right COMPARE
 %right ASSIGN
@@ -93,7 +93,7 @@ EOf
 procedure:
     procedure command
     |
-    procedure EOf {
+    procedure EOC {
         return 0;
     }
     |
@@ -115,12 +115,10 @@ command:
 
 nonreturnable:
     rcondition procedure_declaration {
-        getPrecompilerOutput() << "Complite cycle and assign the procedure.\n";
         $$ = new RLCycle(new RLCommand(perform,$2),$1);
     }
     |
     IF rcondition procedure_declaration {
-        getPrecompilerOutput() << "Complite condition and assign the procedure.\n";
         $$ = new RLConditional(new RLCommand(perform,$3),$2);
     }
     |
@@ -134,12 +132,15 @@ nonreturnable:
     |
     OSBRACE returnable ESBRACE OSBRACE PLEASE ESBRACE OSBRACE MARKI ESBRACE SEMICOLON {
         //collectionerOfExceptions.add(Exception(std::string("Now this doesn't work."),yylineno));
-	getPrecompilerOutput() << "Mark has been registered." << std::endl;
         $$ = new RLConditional(new RLCommand(maketransition,$8),$2);
     }
     |
     PRINT returnable SEMICOLON {
         $$ = new RLCommand(show,$2);
+    }
+    |
+    PRINTALL SEMICOLON {
+	$$ = new RLPrintAll();
     }
     ;
 
@@ -189,8 +190,13 @@ ident:
             RLTypePrototype* res = RLIdentRegister::get(int($1));
             if(res->getTypeQualifier() == RLTypePrototype::Bool)
                 $$ = new RLDereference(res);
-            else if(res->getTypeQualifier() == RLTypePrototype::Bool) {
-		
+            else if(res->getTypeQualifier() == RLTypePrototype::Array) {
+		RLArray* arr = (RLArray*)res;
+		if(arr->getRootQualifier() == RLTypePrototype::Bool) {
+		    $$ = new RLDereference(res);
+		} else
+		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
+                                       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
 	    } else 
                 //TODO Reform this exception message!!!
                 collectionerOfExceptions.add(Exception(std::string("Expected RL") +
@@ -202,12 +208,20 @@ ident:
         if(RLIdentRegister::get(int($1))==NULL)
             $$ = new RLDereference(new RLNumber(0,int($1)));
         else {
-            RLTypePrototype* res = RLIdentRegister::get(int($1));
-            if(res->getTypeQualifier() != RLTypePrototype::Number)
-                collectionerOfExceptions.add(Exception(std::string("Expected RL") +
-                                                       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
-            else
-                $$ = new RLDereference(res);
+	    RLTypePrototype* res = RLIdentRegister::get(int($1));
+	    if(res->getTypeQualifier() == RLTypePrototype::Number)
+		$$ = new RLDereference(res);
+	    else if(res->getTypeQualifier() == RLTypePrototype::Array) {
+		RLArray* arr = (RLArray*)res;
+		if(arr->getRootQualifier() == RLTypePrototype::Number) {
+		    $$ = new RLDereference(res);
+		} else
+		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
+				       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
+	    } else 
+		//TODO Reform this exception message!!!
+		collectionerOfExceptions.add(Exception(std::string("Expected RL") +
+						       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
         }
     }
     |
@@ -215,12 +229,20 @@ ident:
         if(RLIdentRegister::get(int($1))==NULL)
             $$ = new RLDereference(new RLProcedure(int($1)));
         else {
-            RLTypePrototype* res = RLIdentRegister::get(int($1));
-            if(res->getTypeQualifier() != RLTypePrototype::Procedure)
-                collectionerOfExceptions.add(Exception(std::string("Expected RL") +
-                                                       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
-            else
-                $$ = new RLDereference(res);
+	    RLTypePrototype* res = RLIdentRegister::get(int($1));
+	    if(res->getTypeQualifier() == RLTypePrototype::Procedure)
+		$$ = new RLDereference(res);
+	    else if(res->getTypeQualifier() == RLTypePrototype::Array) {
+		RLArray* arr = (RLArray*)res;
+		if(arr->getRootQualifier() == RLTypePrototype::Procedure) {
+		    $$ = new RLDereference(res);
+		} else
+		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
+				       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
+	    } else 
+		//TODO Reform this exception message!!!
+		collectionerOfExceptions.add(Exception(std::string("Expected RL") +
+						       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
         }
     }
     |
@@ -251,7 +273,6 @@ array:
 array_rep:
     array_rep array_end {
 	if(arrayInfo_.nArray != NULL) {
-	    getPrecompilerOutput() << "[" << arrayInfo_.rootDepth << "]";
 	    arrayInfo_.rootDepth++;
 	}
 	$$ = new RLCommand(arrayat,$1,$2);
@@ -259,7 +280,6 @@ array_rep:
     |
     array_rep array_index {
 	if(arrayInfo_.nArray != NULL) {
-	    getPrecompilerOutput() << "[" << arrayInfo_.rootDepth << "]";
 	    arrayInfo_.rootDepth++;
 	}
         $$ = new RLCommand(arrayat,$1,$2);
@@ -267,10 +287,13 @@ array_rep:
     |
     array_start {
 	if(RLIdentRegister::get((int)$1)==NULL) {
-	    arrayInfo_.rootDepth = 1;
-	    arrayInfo_.nArray = new RLArray(0,RLTypePrototype::Number,(int)$1);
-	    getPrecompilerOutput() << "arr";
-	    $$ = new RLDereference(arrayInfo_.nArray);
+	    if(arrayInfo_.nArray == NULL) {
+		arrayInfo_.rootDepth = 1;
+		arrayInfo_.nArray = new RLArray(0,arrayInfo_.rootType,(int)$1);
+		$$ = new RLDereference(arrayInfo_.nArray);
+	    } else {
+		collectionerOfExceptions.add(Exception(std::string("Declaration of arrays inside another declaration not allowed."),yylineno));
+	    }
 	} else {
 	    RLTypePrototype* res = RLIdentRegister::get((int)$1);
 	    $$ = new RLDereference(res);

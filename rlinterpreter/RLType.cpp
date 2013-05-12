@@ -35,6 +35,14 @@ void RLIdentRegister::clear() {
     register_.clear();
 }
 
+void RLIdentRegister::showAll() {
+    IdentifierRegister::iterator it;
+    for(it = register_.begin(); it != register_.end(); it++) {
+        RLInterpreter::getApplicationOutput() << it->first << " ";
+        it->second->print();
+    }
+}
+
 IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
 
 
@@ -43,6 +51,7 @@ IdentifierRegister RLIdentRegister::register_ = IdentifierRegister();
  */
 RLTypePrototype::LinkCounter RLTypePrototype::tempVars_ = RLTypePrototype::LinkCounter();
 RLTypePrototype::LinkCounter RLTypePrototype::constVars_ = RLTypePrototype::LinkCounter();
+RLTypePrototype::LinkCounter RLTypePrototype::dynamicVars_ = RLTypePrototype::LinkCounter();
 
 void RLTypePrototype::clearTempVars() {
     for(int i = 0; i < tempVars_.size(); i++) {
@@ -55,6 +64,13 @@ void RLTypePrototype::clearConstVars() {
         delete constVars_[i];
     }
     constVars_.clear();
+}
+
+void RLTypePrototype::clearDynamicallyAllocatedVars() {
+    for(int i = 0; i < dynamicVars_.size(); i++) {
+        delete dynamicVars_[i];
+    }
+    dynamicVars_.clear();
 }
 
 void RLTypePrototype::killThemAll() {
@@ -88,7 +104,6 @@ std::string RLTypePrototype::typeName(RLTypePrototype::RLTypeQualifier qualifier
 }
 
 RLTypePrototype::RLTypePrototype() {
-    //linkCounter_.push_back(this);
 }
 
 bool RLTypePrototype::reg(int id) {
@@ -105,6 +120,11 @@ RLTypePrototype* RLTypePrototype::markAsTemp() {
 }
 RLTypePrototype* RLTypePrototype::markAsConst() {
     constVars_.push_back(this);
+    return this;
+}
+
+RLTypePrototype *RLTypePrototype::markAsDynamicallyAllocated() {
+    dynamicVars_.push_back(this);
     return this;
 }
 
@@ -201,7 +221,7 @@ void RLBool::init_(bool val) {
 }
 
 RLTypePrototype* RLBool::copy() const {
-	return new RLBool(getValue());
+    return (new RLBool(getValue()))->markAsDynamicallyAllocated();
 }
 
 bool RLBool::getValue() const {
@@ -276,7 +296,7 @@ void RLNumber::init_(int val) {
 }
 
 RLTypePrototype* RLNumber::copy() const {
-	return new RLNumber(getValue());
+    return (new RLNumber(getValue()))->markAsDynamicallyAllocated();
 }
 
 int RLNumber::getValue() const {
@@ -336,8 +356,8 @@ RLTypePrototype* RLNumber::applyBinary(RLOperator oper, RLTypePrototype* val) {
 		}
 	break;
 	default:
-        // Unexpected binary operator for RLBool
-        throw RLTypeException(std::string("Unexpected binary operator for RLBool."));
+        // Unexpected binary operator for RLNumb
+        throw RLTypeException(std::string("Unexpected binary operator for RLNumb."));
 	break;
     }
 
@@ -345,35 +365,29 @@ RLTypePrototype* RLNumber::applyBinary(RLOperator oper, RLTypePrototype* val) {
 }
 
 void RLNumber::print() {
-    RLInterpreter::getApplicationOutput() << "RLType = Number, value = " << value_ << "\n";
+    RLInterpreter::getApplicationOutput() << "RLType = Number, Value = " << value_ << "\n";
 }
 
 
 /*
  * class RLArray : public RLType
  */
-RLArray::RLArray(RLTypeQualifier qualifier) : RLTypePrototype() {
-    init_(qualifier);
-}
-RLArray::RLArray(RLTypeQualifier qualifier, int id) : RLTypePrototype() {
-    init_(qualifier);
-    reg(id);
-}
-
 RLArray::RLArray(int depth, RLTypePrototype::RLTypeQualifier rootqualifier) {
-    setRootDepth(depth);
-    rootType_ = rootqualifier;
-    meta_.typeName = Array;
+    init_(depth,rootqualifier);
 }
 
 RLArray::RLArray(int depth, RLTypePrototype::RLTypeQualifier rootqualifier, int id) {
-    setRootDepth(depth);
-    rootType_ = rootqualifier;
+    init_(depth,rootqualifier);
     reg(id);
-    meta_.typeName = Array;
 }
 
-void RLArray::init_(RLTypeQualifier qualifier) {
+RLArray::~RLArray() {
+    clear();
+}
+
+void RLArray::init_(int depth, RLTypeQualifier rootqualifier) {
+    setRootDepth(depth);
+    rootType_ = rootqualifier;
     meta_.typeName = Array;
 }
 
@@ -381,10 +395,10 @@ RLTypePrototype* RLArray::copy() const {
     RLArray* temp = new RLArray(getRootDepth()+1,getRootQualifier());
 
     for(RLArrayStorage::const_iterator i=elements_.begin();i!=elements_.end();i++) {
-        temp->elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
+        temp->elements_.insert(RLArrayStoragePair(i->first,(i->second->copy())));
     }
 
-    return temp;
+    return temp->markAsDynamicallyAllocated();
 }
 
 void RLArray::setElem(int pos, RLTypePrototype* elem) {
@@ -405,6 +419,14 @@ RLTypePrototype::RLTypeQualifier RLArray::getRootQualifier() const {
 
 void RLArray::setRootQualifier(RLTypeQualifier qual) {
     rootType_ = qual;
+}
+
+void RLArray::clear() {
+    RLArrayStorage::const_iterator i;
+    for(i = elements_.begin(); i != elements_.end(); i++) {
+        i->second->markAsTemp();
+    }
+    elements_.clear();
 }
 
 int RLArray::getRootDepth() const {
@@ -458,11 +480,11 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                     }
                 }
 
-                return new RLBool(true);
+                return (new RLBool(true))->markAsTemp();
             } else {
                 // Can't compare RLArray with val->getTypeQualifier()
                 throw RLTypeException(std::string("Can't compare RLArray with ") +
-                                         RLTypePrototype::typeName(val->getTypeQualifier()));
+                                      RLTypePrototype::typeName(val->getTypeQualifier()));
 
                 return (new RLBool(false))->markAsTemp();
             }
@@ -472,10 +494,15 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                 RLArray* vala = (RLArray*)val;
                 if(currentRootDepth_ == vala->currentRootDepth_ && rootType_ == vala->rootType_) {
                     RLArrayStorage::const_iterator i;
+                    
+                    clear();
     
                     for(i = vala->elements_.begin(); i != vala->elements_.end(); i++) {
-                        elements_.insert(RLArrayStoragePair(i->first,i->second->copy()));
+                        elements_.insert(RLArrayStoragePair(i->first,(i->second->copy())));
                     }
+                } else {
+                    // Can't assign RLArray with different dimension and root types.
+                    throw RLTypeException(std::string("Can't assign RLArray with different dimension and root types."));
                 }
             } else {
                 // Can't assign RLArray with val->getTypeQualifier()
@@ -490,14 +517,25 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
                 RLTypePrototype* res = getElem(valn->getValue());
                 
                 if(res==NULL) {
-                    if(currentRootDepth_>1) {
+                    if(currentRootDepth_ > 1) {
                         RLArray* array = new RLArray(currentRootDepth_,rootType_);
-                        setElem(valn->getValue(),array);
+                        setElem(valn->getValue(),array->markAsDynamicallyAllocated());
                         return array;
+                    } else if(currentRootDepth_ == 1) {
+                        RLTypePrototype* new_element;
+                        
+                        if(getRootQualifier() == Number)
+                            new_element = new RLNumber(0);
+                        else if(getRootQualifier() == Bool)
+                            new_element = new RLBool(false);
+                        else if(getRootQualifier() == Procedure)
+                            new_element = new RLProcedure();
+                        
+                        setElem(valn->getValue(),new_element->markAsDynamicallyAllocated());
+                        return new_element;
                     } else {
-                        RLNumber* numb = new RLNumber(0);
-                        setElem(valn->getValue(),numb);
-                        return numb;
+                        // Trying to get value in not existing  dimension of RLArray
+                        throw RLTypeException(std::string("Trying to get value in not existing  dimension of RLArray"));
                     }
                 }
 
@@ -517,13 +555,22 @@ RLTypePrototype* RLArray::applyBinary(RLOperator oper, RLTypePrototype *val) {
 }
 
 void RLArray::print() {
-    RLInterpreter::getApplicationOutput() << "RLType = Array of " << RLTypePrototype::typeName(getRootQualifier()) << ".\n\tValues\n";
+    print_("");
+}
+
+void RLArray::print_(std::string delimetr) {
+    RLInterpreter::getApplicationOutput() << "RLType = Array of " << RLTypePrototype::typeName(getRootQualifier()) << ". Values:\n";
 
     RLArrayStorage::const_iterator i;
     for(i = elements_.begin(); i != elements_.end(); i++) {
+        RLInterpreter::getApplicationOutput() << delimetr;
         RLInterpreter::getApplicationOutput() << "[" << i->first << "] ";
 
-        i->second->print();
+        if(i->second->getTypeQualifier() == Array)
+            ((RLArray*)i->second)->print_(delimetr+"\t");
+        else {
+            i->second->print();
+        }
     }
 }
 
@@ -555,7 +602,7 @@ void RLMark::init_(RLTypePrototype* owner, int line) {
 }
 
 RLTypePrototype* RLMark::copy() const {
-    return new RLMark(owner_,linePointer_);
+    return (new RLMark(owner_,linePointer_))->markAsDynamicallyAllocated();
 }
 
 void RLMark::setOwner(RLProcedure* nowner) {
@@ -601,14 +648,14 @@ RLTypePrototype* RLMark::applyBinary(RLOperator oper, RLTypePrototype* val) {
         return temp;
 
     // No one binary operation declared for RLMark.
-    throw RLTypeException(std::string("No one binary operation declared for RLMark.\n"));
+    throw RLTypeException(std::string("No one binary operation declared for RLMark."));
 
     return this;
 }
 
 void RLMark::print() {
     if(owner_!=NULL) {
-        RLInterpreter::getApplicationOutput() << "RLMark.";
+        RLInterpreter::getApplicationOutput() << "RLMark.\n";
     }
 }
 
@@ -640,7 +687,7 @@ RLTypePrototype* RLProcedure::copy() const {
     RLProcedure* res = new RLProcedure();
     delete res->chain_;
     res->chain_ = (RLChainCommands*)chain_->copy();
-    return res;
+    return res->markAsDynamicallyAllocated();
 }
 
 void RLProcedure::addCommand(RLCommandPrototype* c) {
@@ -700,7 +747,7 @@ RLTypePrototype* RLProcedure::applyBinary(RLOperator oper, RLTypePrototype* val)
 }
 
 void RLProcedure::print() {
-    RLInterpreter::getApplicationOutput() << "RLProcedure.";
+    RLInterpreter::getApplicationOutput() << "RLProcedure.\n";
 }
 
 void RLProcedure::exec() {

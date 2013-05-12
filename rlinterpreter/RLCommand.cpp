@@ -230,3 +230,14 @@ RLTypePrototype* RLCycle::exec() const {
 RLCommandPrototype* RLCycle::copy() const {
     return new RLCycle(effect_,condition_);
 }
+
+
+
+// Debug
+RLCommandPrototype* RLPrintAll::copy() const {
+    return new RLPrintAll();
+}
+
+RLTypePrototype* RLPrintAll::exec() const {
+    RLIdentRegister::showAll();
+}

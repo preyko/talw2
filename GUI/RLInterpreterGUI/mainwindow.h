@@ -42,14 +42,11 @@ public slots:
     void startProcess();
 
     void codeChanged();
+    
+    void setTitle(QString title = "");
 
 private:
     Ui::MainWindow *ui;
-
-    void fillCode_(QFile& source);
-    void fillTO_(QFile& source);
-    void fillLog_(QFile& source);
-    void fillAppOut_(QFile& source);
 
     QString codeFileName_;
 

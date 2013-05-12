@@ -70,25 +70,20 @@ NUMBI,id=[0-9]+            {
 }
 
 ASSIGN                          {
-
     return ASSIGN;
 }
 COMPARE                         {
-
     return COMPARE;
 }
 
 INC                             {
-
     return INC;
 }
 DEC                             {
-
     return DEC;
 }
 
 NOR                             {
-
     return NOR;
 
 }
@@ -98,22 +93,21 @@ IF                              {
 }
 
 PLEASE                          {
-
     return PLEASE;
 }
 
 LINK                            {
-
     return LINK;
 }
 RLINK                           {
-
     return RLINK;
 }
 
 PRINT                           {
-
     return PRINT;
+}
+PRINTALL                        {
+    return PRINTALL;
 }
 
 OFBRACE                         {
@@ -152,12 +146,12 @@ SEMICOLON                       {
 
  }
 
-ERRTOKEN\ '%s'\ on\ line\ #[0-9]+. {
-
+ERRTOKEN\ '%s'\ on\ line\ #[0-9]+\. {
+    
 }
 
 <<EOF>>                         {
-    return EOf;
+    return EOC;
 }
 %%
 RLNAMESPACE_END

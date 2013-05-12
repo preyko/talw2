@@ -37,15 +37,14 @@ public:
 
 public slots:
     void lineNumberChanged();
+    
+signals:
+    void codeChanged();
 
 private:
     Ui::RLCodeBrowser *ui;
 
     int currentLineCount_;
-    bool scrollBarActive_;
-
-    QVector<QTextCursor> selectedPositions_;
-    QTextBlockFormat defaultFormat_;
 };
 
 #endif // RLCODEBROWSER_H
