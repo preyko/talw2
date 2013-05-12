@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by Qt Creator 2.4.1, 2013-05-07T17:49:40. -->
+<!-- Written by Qt Creator 2.4.1, 2013-05-12T03:07:24. -->
 <qtcreator>
  <data>
   <variable>GenericProjectManager.GenericProject.Toolchain</variable>
@@ -33,7 +33,7 @@
    <value type="int" key="EditorConfiguration.IndentSize">4</value>
    <value type="bool" key="EditorConfiguration.MouseNavigation">true</value>
    <value type="int" key="EditorConfiguration.PaddingMode">1</value>
-   <value type="bool" key="EditorConfiguration.ScrollWheelZooming">true</value>
+   <value type="bool" key="EditorConfiguration.ScrollWheelZooming">false</value>
    <value type="int" key="EditorConfiguration.SmartBackspaceBehavior">0</value>
    <value type="bool" key="EditorConfiguration.SpacesForTabs">true</value>
    <value type="int" key="EditorConfiguration.TabKeyBehavior">0</value>
@@ -42,7 +42,7 @@
    <value type="int" key="EditorConfiguration.Utf8BomBehavior">1</value>
    <value type="bool" key="EditorConfiguration.addFinalNewLine">true</value>
    <value type="bool" key="EditorConfiguration.cleanIndentation">true</value>
-   <value type="bool" key="EditorConfiguration.cleanWhitespace">true</value>
+   <value type="bool" key="EditorConfiguration.cleanWhitespace">false</value>
    <value type="bool" key="EditorConfiguration.inEntireDocument">false</value>
   </valuemap>
  </data>
@@ -56,7 +56,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Desktop</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">GenericProjectManager.GenericTarget</value>
-   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
+   <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
@@ -64,7 +64,7 @@
     <value type="QString" key="ProjectExplorer.BuildCOnfiguration.ToolChain">ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-32bit./usr/bin/gdb</value>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">lib</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments"></value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
       <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/RLPrecompiler</value>
@@ -73,7 +73,7 @@
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">debug</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments"></value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
       <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/rlinterpreter</value>
@@ -88,19 +88,19 @@
     </valuemap>
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.1">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clear</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clean</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
       <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/rlinterpreter</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/RLPrecompiler</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clear</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clean</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
       <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/RLPrecompiler</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/rlinterpreter</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
@@ -114,10 +114,68 @@
     <value type="bool" key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment">false</value>
     <valuelist type="QVariantList" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">all</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Release</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">GenericProjectManager.GenericBuildConfiguration</value>
    </valuemap>
-   <value type="int" key="ProjectExplorer.Target.BuildConfigurationCount">1</value>
+   <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
+    <value type="QString" key="GenericProjectManager.GenericBuildConfiguration.BuildDirectory">/home/daniel/workspace/talw2</value>
+    <value type="QString" key="ProjectExplorer.BuildCOnfiguration.ToolChain">ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-linux-generic-elf-32bit./usr/bin/gdb</value>
+    <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
+     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">DEBUG=-ggdb</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
+      <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/RLPrecompiler</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
+     </valuemap>
+     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">DEBUG=-ggdb</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
+      <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/rlinterpreter</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
+     </valuemap>
+     <value type="int" key="ProjectExplorer.BuildStepList.StepsCount">2</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Build</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Build</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Build</value>
+    </valuemap>
+    <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.1">
+     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clean</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
+      <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/RLPrecompiler</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
+     </valuemap>
+     <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">clean</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Command">make</value>
+      <value type="bool" key="ProjectExplorer.ProcessStep.Enabled">true</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/daniel/workspace/talw2/rlinterpreter</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Custom Process Step</value>
+      <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
+     </valuemap>
+     <value type="int" key="ProjectExplorer.BuildStepList.StepsCount">2</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Clean</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Clone of Clean</value>
+     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.BuildSteps.Clean</value>
+    </valuemap>
+    <value type="int" key="ProjectExplorer.BuildConfiguration.BuildStepListCount">2</value>
+    <value type="bool" key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment">false</value>
+    <valuelist type="QVariantList" key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges"/>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName"></value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Debug</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">GenericProjectManager.GenericBuildConfiguration</value>
+   </valuemap>
+   <value type="int" key="ProjectExplorer.Target.BuildConfigurationCount">2</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.DeployConfiguration.0">
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <value type="int" key="ProjectExplorer.BuildStepList.StepsCount">0</value>
@@ -217,7 +275,7 @@
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.EnvironmentId</variable>
-  <value type="QString">{85267343-71fe-447b-b4d3-d6078742fc0d}</value>
+  <value type="QString">{63f3becd-f6e0-4603-bb00-4bb0089257e5}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.FileVersion</variable>

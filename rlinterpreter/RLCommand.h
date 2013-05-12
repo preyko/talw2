@@ -33,8 +33,6 @@ public:
 
     virtual RLTypePrototype* exec() const = 0;
 
-    virtual void print() const = 0;
-
     void setLinePosition(int line);
     int getLinePosition();
 
@@ -53,8 +51,6 @@ public:
 
     virtual RLTypePrototype* exec() const;
 
-    virtual void print() const;
-
 private:
     RLTypePrototype* value_;
 
@@ -71,8 +67,6 @@ public:
 
     virtual RLTypePrototype* exec() const;
 
-    virtual void print() const;
-
 protected:
     virtual RLTypePrototype* exec_() const;
 
@@ -86,6 +80,27 @@ private:
     void init_(RLOperator oper, RLCommandPrototype* f, RLCommandPrototype* s);
 };
 
+class RLChainCommands : public RLCommandPrototype  {
+public:
+    typedef std::vector<RLCommandPrototype*> ChainType;
+    
+    ~RLChainCommands();
+    
+    virtual RLCommandPrototype* copy() const;
+
+    virtual RLTypePrototype* exec() const;
+    
+    void addCommand(RLCommandPrototype* cmd);
+    
+    int getChainSize() const;
+    
+protected:
+    virtual RLTypePrototype* exec_() const;
+    
+private:
+    ChainType chain_;
+    
+};
 
 class RLConditional : public RLCommandPrototype {
 public:
@@ -95,8 +110,6 @@ public:
     virtual RLCommandPrototype* copy() const;
 
     virtual RLTypePrototype* exec() const;
-
-    virtual void print() const;
 
 protected:
     void exec_() const;
@@ -118,8 +131,6 @@ public:
     virtual RLCommandPrototype* copy() const;
 
     virtual RLTypePrototype* exec() const;
-
-    virtual void print() const;
 
 private:
     static const int MaxCycleIteration_ = 250;

@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <fstream>
 #include <iostream>
@@ -7,10 +6,10 @@
 #include <QMainWindow>
 
 #include <QMessageBox>
-#include <QKeyEvent>
 #include <QFileDialog>
-#include <QAction>
 #include <QFile>
+
+#include <QPoint>
 
 #include <QDebug>
 
@@ -21,6 +20,7 @@
 #include "RLTokenizer.h"
 #include "RLPrecompiler.h"
 
+#include "RLOStream.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,9 +42,6 @@ public slots:
     void startProcess();
 
     void codeChanged();
-    
-protected:
-    void keyPressEvent(QKeyEvent* ke);
 
 private:
     Ui::MainWindow *ui;
@@ -58,14 +55,3 @@ private:
 
     bool codeNotChanged_;
 };
-
-
-/*
-class RLStreamConnector : public QObject, public std::ostream {
-    Q_OBJECT
-public:
-
-};
-*/
-
-#endif // MAINWINDOW_H

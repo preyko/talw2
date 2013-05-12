@@ -7,6 +7,15 @@
 #include <vector>
 #include <map>
 
+#include "RLTools.h"
+
+
+/* Solution to the crosslinks problem */
+class RLTypePrototype;
+class RLProcedure;
+class RLCommandPrototype;
+class RLChainCommands;
+
 /*
  * RLTypeException: Exception that describe errors with RLTypes in run time.
  */
@@ -31,10 +40,6 @@ enum RLOperator { show, np, increment, decrement, assign, compare, arrayat, make
 /*
  * RLIdentRegister: Reestr of identifier that keep variables.
  */
-
-/* Solution to the crosslinks problem */
-class RLTypePrototype;
-
 typedef std::map<int,RLTypePrototype*> IdentifierRegister;
 typedef std::pair<int,RLTypePrototype*> IdentifierRegisterPair;
 
@@ -54,7 +59,6 @@ private:
 /*
  * RLTypePrototype: Base type for each other RLType.
  */
-class RLProcedure;
 class RLTypePrototype {
 public:
     typedef std::vector<RLTypePrototype*> LinkCounter;
@@ -90,6 +94,7 @@ public:
 
     bool linkWithProcedure(RLProcedure* proc);
     bool breakLinkWithProcedure(RLProcedure* proc);
+    void performLinkedProcedures();
 
 protected:
     RLTypeMeta meta_;
@@ -153,23 +158,32 @@ public:
     RLArray(RLTypeQualifier qualifier);
     RLArray(RLTypeQualifier qualifier, int key);
 
+    RLArray(int depth, RLTypeQualifier rootqualifier);
+    RLArray(int depth, RLTypeQualifier rootqualifier,int id);
+
     virtual RLTypePrototype* copy() const;
 
+    void setElem(int pos,RLTypePrototype* elem);
     RLTypePrototype* getElem(int pos) const;
-
-    RLTypeQualifier getElemQualifier() const;
+    
+    int getRootDepth() const;
+    void setRootDepth(int depth);
+    
+    RLTypeQualifier getRootQualifier() const;
+    void setRootQualifier(RLTypeQualifier qual);
 
     virtual RLTypePrototype* applyUnary(RLOperator oper);
     virtual RLTypePrototype* applyBinary(RLOperator oper, RLTypePrototype* val);
 
     virtual void print();
 
-protected:
-    RLTypeQualifier arrayType_;
-    RLArrayStorage elements_;
-
 private:
     void init_(RLTypeQualifier qualifier);
+
+    int currentRootDepth_;
+    RLTypeQualifier rootType_;
+    
+    RLArrayStorage elements_;
 };
 
 class RLMark : public RLTypePrototype {
@@ -206,12 +220,8 @@ private:
 };
 
 
-class RLCommandPrototype;
 class RLProcedure : public RLTypePrototype {
-    friend class RLTypePrototype;
 public:
-    typedef std::vector<RLCommandPrototype*> RLCommandChain;
-
     RLProcedure();
     RLProcedure(int id);
     ~RLProcedure();
@@ -230,17 +240,12 @@ public:
     virtual RLTypePrototype* applyBinary(RLOperator oper, RLTypePrototype* val);
 
     virtual void print();
-    void printCommand(int line);
 
 protected:
     int currentLinePointer_;
 
-    RLCommandChain chain_;
-
 private:
     void init_();
-    void exec_();
-    void clear_();
 
-    RLProcedure* referenceTo_;
+    RLChainCommands* chain_;
 };

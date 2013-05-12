@@ -7,42 +7,36 @@ CC = gcc
 LIBNAME=rlprecomp
 LIBFILE=lib$(LIBNAME).a
 
-INCLUDDIR= . -I ../rlinterpreter
-LIBINC = -L ../rlinterpreter -l rltype
-
 BUILDDIR=build
 
+INCLUDDIR= -I . -I ../rlinterpreter -I $(BUILDDIR)/
+LIBINC = -L ../rlinterpreter -l rltype
 
-all: process_precompiller
-	$(CPP) -I $(INCLUDDIR) -lfl -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
-	$(CPP) -I $(INCLUDDIR) -ggdb -DMAIN -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
-
-	$(CPP) -I $(INCLUDDIR) -ggdb $(BUILDDIR)/precompiler.o $(BUILDDIR)/token_reader.o $(LIBINC) -o Precompiler
-
-process_precompiller: token_reader.l precompiler.y
-	mkdir -p $(BUILDDIR)
-
-	$(LEX) -o $(BUILDDIR)/token_reader.c token_reader.l
-	$(YYAC) -d -v precompiler.y -o $(BUILDDIR)/precompiler.cc
-	
-	tools/apts precompiler_head $(BUILDDIR)/precompiler.cc precompiler_tail
-	tools/apts token_reader_head $(BUILDDIR)/precompiler.hh token_reader_tail
-
-
-process_tokenizer: tokenizer.l
-	mkdir -p $(BUILDDIR)
-
-	$(LEX) -o $(BUILDDIR)/tokenizer.c tokenizer.l
-
-tokenizer: process_tokenizer 
-	$(CPP) -I $(INCLUDDIR) -ggdb -DMAIN $(BUILDDIR)/tokenizer.c -o Tokenizer
-
-lib: process_precompiller process_tokenizer
-	$(CPP) -I $(INCLUDDIR) -ggdb -lfl -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
-	$(CPP) -I $(INCLUDDIR) -ggdb -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
-	$(CPP) -I $(INCLUDDIR) -ggdb -c $(BUILDDIR)/tokenizer.c -o $(BUILDDIR)/tokenizer.o
-
+all: $(BUILDDIR)/precompiler.o $(BUILDDIR)/token_reader.o $(BUILDDIR)/tokenizer.o
 	ar rc $(BUILDDIR)/$(LIBFILE) $(BUILDDIR)/token_reader.o $(BUILDDIR)/precompiler.o $(BUILDDIR)/tokenizer.o
 
-clear:
+$(BUILDDIR)/precompiler.cc: precompiler.y precompiler_head precompiler_tail precompilerhh_head precompilerhh_tail
+	mkdir -p $(BUILDDIR)
+	$(YYAC) -d $(DEBUG_YYAC) precompiler.y -o $(BUILDDIR)/precompiler.cc
+	tools/apts precompiler_head $(BUILDDIR)/precompiler.cc precompiler_tail
+	tools/apts precompilerhh_head $(BUILDDIR)/precompiler.hh precompilerhh_tail
+
+$(BUILDDIR)/token_reader.c: token_reader.l
+	$(LEX) -o $(BUILDDIR)/token_reader.c token_reader.l
+
+$(BUILDDIR)/tokenizer.c: tokenizer.l
+	$(LEX) -o $(BUILDDIR)/tokenizer.c tokenizer.l
+
+
+$(BUILDDIR)/precompiler.o: $(BUILDDIR)/precompiler.cc
+	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
+
+$(BUILDDIR)/token_reader.o: $(BUILDDIR)/token_reader.c
+	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
+
+$(BUILDDIR)/tokenizer.o: $(BUILDDIR)/tokenizer.c
+	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/tokenizer.c -o $(BUILDDIR)/tokenizer.o
+
+
+clean:
 	rm -r $(BUILDDIR)

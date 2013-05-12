@@ -53,12 +53,13 @@ private:
 
 };
 
-extern FILE* yyin;
-extern std::ofstream* logstream;
+extern std::ostream* logstream;
 
-void Precompiler(const char* token_input);
+void Precompile(const char* token_input);
 
 std::ostream& getPrecompilerOutput();
+
 void setPrecompilerOutput(std::string lo);
+void setPrecompilerOutput(std::ostream& lo);
 
 }

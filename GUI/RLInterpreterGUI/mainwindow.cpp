@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QPoint>
-#include <QTextFormat>
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -26,6 +23,7 @@ void MainWindow::openRLFile() {
     fillCode_(rl_file);
 
     codeFileName_ = filename;
+	
     ui->statusBar->showMessage(codeFileName_);
 }
 
@@ -38,67 +36,71 @@ void MainWindow::saveRLFile() {
 
 void MainWindow::saveAsRLFile() {
     codeFileName_ = QFileDialog::getSaveFileName(this,
-                                                     QString::fromLocal8Bit("Save RLCode as..."),
-                                                     QDir::home().absolutePath());
+                                                 QString::fromLocal8Bit("Save RLCode as..."),
+                                                 QDir::home().absolutePath(),
+                                                 tr("RLCode file (*.rl)"));
+    if(!codeFileName_.contains(tr(".rl")))
+        codeFileName_.append(tr(".rl"));
+    
     saveRLFile();
 }
 
-inline void setLineRed(QTextBrowser* tb,int line) {
-    QColor wlc(Qt::red);
-    wlc.setAlpha(50);
-    QTextCharFormat wlf;
-    wlf.setBackground(QBrush(wlc));
-    tb->cursorForPosition(QPoint(0,line)).setCharFormat(wlf);
-}
-
 void MainWindow::startProcess() {
+	ui->codeBrowser->unselectAll();
+
+    QFile codeTmp("code.tmp");
+    ui->codeBrowser->writeContent(codeTmp);
+	
+	ui->tokenOutput->clear();
+	ui->precompilerOutput->clear();
+	ui->applicationOutput->clear();
+	
+	RLOStream tokenOutput("tok.tmp");
+	RLOStream precpOutput("log.tmp");
+	RLOStream appliOuptut("appout.tmp");
+	
+	connect(&tokenOutput,SIGNAL(sendInterceptedData(QString)),ui->tokenOutput,SLOT(append(QString)));
+	connect(&precpOutput,SIGNAL(sendInterceptedData(QString)),ui->precompilerOutput,SLOT(append(QString)));
+	connect(&appliOuptut,SIGNAL(sendInterceptedData(QString)),ui->applicationOutput,SLOT(append(QString)));
+	
+	RLTokenizer::setTokenizerOutput(tokenOutput);
+	RLPrecompiler::setPrecompilerOutput(precpOutput);
+	RLInterpreter::setApplicationOutput(appliOuptut);
+	
     try {
-        ui->codeBrowser->unselectAll();
+        RLTokenizer::Tokenize("code.tmp");
 
-        QFile codeTmp("code.tmp");
-        ui->codeBrowser->writeContent(codeTmp);
-
-        RLTokenizer::Tokenize("code.tmp","tok.tmp");
-
-        QFile tok("tok.tmp");
-        fillTO_(tok);
-
-        RLInterpreter::Initialization();
-
-        RLPrecompiler::setPrecompilerOutput("log.tmp");
-        RLPrecompiler::Precompiler("tok.tmp");
-
-        QFile llog("log.tmp");
-        fillLog_(llog);
-
-        RLInterpreter::setApplicationOutput("appout.tmp");
+        RLPrecompiler::Precompile("tok.tmp");
+		
         RLInterpreter::Perform();
-
-        QFile app_out("appout.tmp");
-        fillAppOut_(app_out);
 
         ui->tabWidget->setCurrentWidget(ui->programOutputTab);
     } catch(RLPerformException& exc) {
-        ui->applicationOutput->append(tr("Run-time error:") +
-                                      QString::number(exc.whatLine()) +
-                                      tr(":") +
-                                      QString(exc.what().c_str()));
+        RLPrecompiler::getPrecompilerOutput() << "Run-time error:"
+                                              << intToStr(exc.whatLine()) 
+                                              << ":"
+                                              << exc.what().c_str()
+											  << std::endl;
 
         ui->codeBrowser->selectLine(exc.whatLine());
-
     } catch(RLPrecompiler::Exceptions& exc) {
-        for(int i=0;i<exc.getCollectioner().size();i++) {
+        for(uint i=0;i<exc.getCollectioner().size();i++) {
             RLPrecompiler::Exception* exception = &exc.getCollectioner()[i];
 
-            ui->precompilerLog->append(tr("Precompile error:") +
-                                          QString::number(exception->whatLine()) +
-                                          tr(":") +
-                                          QString(exception->what().c_str()));
+            RLPrecompiler::getPrecompilerOutput() << "Precompile error:"
+                                                  << exception->whatLine()
+                                                  << ":" 
+                                                  << exception->what().c_str()
+												  << std::endl;
 
             ui->codeBrowser->selectLine(exception->whatLine());
         }
         ui->tabWidget->setCurrentWidget(ui->precompilerOutputTab);
     }
+	
+	//disconnect(&toi,SIGNAL(sendInterceptedData(QString)),ui->tokenOutput,SLOT(append(QString)));
+	//disconnect(&pro,SIGNAL(sendInterceptedData(QString)),ui->precompilerOutput,SLOT(append(QString)));
+	//disconnect(&apo,SIGNAL(sendInterceptedData(QString)),ui->applicationOutput,SLOT(append(QString)));
 }
 
 void MainWindow::fillCode_(QFile& source) {
@@ -125,7 +127,7 @@ void MainWindow::fillTO_(QFile& source) {
 }
 
 void MainWindow::fillLog_(QFile& source) {
-    ui->precompilerLog->clear();
+    ui->precompilerOutput->clear();
 
     source.open(QIODevice::ReadOnly);
 
@@ -137,7 +139,7 @@ void MainWindow::fillLog_(QFile& source) {
     }
 
     while(!source.atEnd())
-        ui->precompilerLog->append(source.readAll());
+        ui->precompilerOutput->append(source.readAll());
 
     source.close();
 }
@@ -167,23 +169,6 @@ void MainWindow::codeChanged() {
                    tr("*"));
 }
 
-
-void MainWindow::keyPressEvent(QKeyEvent* ke) {
-    switch(ke->type()) {
-        case Qt::Key_Space:
-            startProcess();
-        break;
-        case Qt::Key_S:
-            //TODO save rl file.
-        break;
-        case Qt::Key_O:
-            if(ke->modifiers() == Qt::ControlModifier)
-                openRLFile();
-        break;
-        default:
-        break;
-    }
-}
 
 MainWindow::~MainWindow() {
     delete ui;

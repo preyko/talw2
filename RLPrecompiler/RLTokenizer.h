@@ -13,9 +13,13 @@ public:
     std::string description;
 };
 
-extern FILE* token_output;
 
-void Tokenize(FILE* input, FILE* output);
-void Tokenize(const char* input, const char* output);
+extern std::ostream* tokenOutput_;
+
+std::ostream& getTokenizerOutput();
+void setTokenizerOutput(std::string filename);
+void setTokenizerOutput(std::ostream& ostr);
+
+void Tokenize(const char* input);
 
 }

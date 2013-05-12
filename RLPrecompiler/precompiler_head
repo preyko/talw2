@@ -10,6 +10,8 @@
 
 #include "RLPrecompiler.h"
 
+#include "RLTools.h"
+
 
 #ifdef MAIN
 int main(int argn,const char** arg) {
@@ -25,12 +27,19 @@ int main(int argn,const char** arg) {
 
 namespace RLPrecompiler {
 
+std::ostream* logstream = NULL; bool outputStreamOpenedHere_ = false;
+
 Exceptions collectionerOfExceptions = Exceptions();
 
-std::ofstream* logstream = NULL;
 
 void setPrecompilerOutput(std::string lo) {
+    outputStreamOpenedHere_ = true;
     logstream = new std::ofstream(lo.c_str());
+}
+
+void setPrecompilerOutput(std::ostream& lo) {
+    outputStreamOpenedHere_ = false;
+    logstream = &lo;
 }
 
 std::ostream& getPrecompilerOutput() {

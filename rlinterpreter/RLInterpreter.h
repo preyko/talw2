@@ -7,6 +7,11 @@
 #include "RLType.h"
 #include "RLCommand.h"
 
+
+class RLProcedure;
+class RLTypePrototype;
+class RLCommandPrototype;
+
 class RLInterpreter {
 public:
     typedef std::vector<RLProcedure*> StackFunctions;
@@ -21,8 +26,9 @@ public:
 
     static void upStack(RLProcedure* u = NULL);
     static RLProcedure* downStack();
-
-    static void setApplicationOutput(std::string file_name);
+    
+    static void setApplicationOutput(std::string fname);
+    static void setApplicationOutput(std::ostream& stream);
     static std::ostream& getApplicationOutput();
 
 
@@ -35,7 +41,8 @@ private:
 
     static StackFunctions stack_;
 
-    static std::ofstream* outputStream_;
+    static bool outputStreamOpenedHere_;
+    static std::ostream* outputStream_;
 
     static bool performingLinkProcedureLocked_;
 

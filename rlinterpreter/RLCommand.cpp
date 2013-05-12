@@ -1,6 +1,8 @@
 #include "RLCommand.h"
-#include "RLPrecompiler.h"
 
+#include "RLType.h"
+#include "RLTools.h"
+#include "RLInterpreter.h"
 
 /*
  * class RLCommandPrototype
@@ -21,10 +23,9 @@ RLDereference::RLDereference(int ref) {
 
     if(res == NULL) {
         // Identifier ref does not declared before.
-        RLPrecompiler::Exception(std::string("Identifier ") +
+        RLPerformException(std::string("Identifier ") +
                                  intToStr(ref) +
-                                 std::string(" does not declared before.\n"));
-
+                                 std::string(" does not declared before.\n"),getLinePosition());
         return;
     } else {
         value_ = res;
@@ -43,13 +44,10 @@ RLCommandPrototype* RLDereference::copy() const {
 }
 
 RLTypePrototype* RLDereference::exec() const {
-    return value_; //->applyUnary(np);
+    value_->performLinkedProcedures();
+    return value_;
 }
 
-void RLDereference::print() const {
-    RLInterpreter::getApplicationOutput() << "Container for:\n";
-    value_->print();
-}
 
 /*
  * class RLCommand : public RLCommandBase
@@ -98,10 +96,6 @@ RLTypePrototype* RLCommand::exec() const {
     return exec_();
 }
 
-void RLCommand::print() const {
-
-}
-
 RLTypePrototype* RLCommand::exec_() const {
     if(first_==NULL && second_==NULL) {
         return (new RLBool(false))->markAsTemp();
@@ -112,6 +106,64 @@ RLTypePrototype* RLCommand::exec_() const {
     }
 }
 
+/*
+ * class RLChainCommands : public RLCommandPrototype
+ */
+RLChainCommands::~RLChainCommands() {
+    for(int i = 0; i < chain_.size(); i++) {
+        delete chain_[i];
+    }
+    
+    chain_.clear();
+}
+
+RLCommandPrototype* RLChainCommands::copy() const {
+    RLChainCommands* tmp = new RLChainCommands();
+    
+    for(int i = 0; i < chain_.size(); i++) {
+        tmp->addCommand(chain_.at(i)->copy());
+    }
+    
+    return tmp;
+}
+
+RLTypePrototype* RLChainCommands::exec() const {
+    return exec_();
+}
+
+void RLChainCommands::addCommand(RLCommandPrototype* cmd) {
+    if(cmd != NULL)
+        chain_.push_back(cmd);
+}
+
+int RLChainCommands::getChainSize() const {
+    return chain_.size() - 1;
+}
+
+RLTypePrototype* RLChainCommands::exec_() const {
+    for(int i = 0; i < chain_.size(); i++) {
+        try {
+            (RLCommandPrototype*)(chain_.at(i))->exec();
+
+            RLTypePrototype::clearTempVars(); // Cleaning temporary variables after execution line of code
+
+        } catch(RLTypeException exc) {
+            throw RLPerformException(exc.what(),chain_.at(i)->getLinePosition());
+
+        } catch(RLMark::TransactionDescriptor descr) {
+            /*if(descr.dawnPerformStackTo == this)
+                i = descr.goToLine;
+            else if(descr.dawnPerformStackTo==RLInterpreter::getMainFunction())
+                throw RLPerformException("Can't make transition.",chain_.at(i)->getLinePosition());
+            else
+                throw descr;
+            */
+
+        }
+    }
+    
+    return NULL;
+}
 
 /*
  * class RLConditional : public RLCommandBase
@@ -139,10 +191,6 @@ RLTypePrototype* RLConditional::exec() const {
         exec_();
 
     return (new RLBool(accept))->markAsTemp();
-}
-
-void RLConditional::print() const {
-
 }
 
 bool RLConditional::isAccept_() const {
@@ -181,8 +229,4 @@ RLTypePrototype* RLCycle::exec() const {
 
 RLCommandPrototype* RLCycle::copy() const {
     return new RLCycle(effect_,condition_);
-}
-
-void RLCycle::print() const {
-    //RLInterpreter::getOutputStream()
 }

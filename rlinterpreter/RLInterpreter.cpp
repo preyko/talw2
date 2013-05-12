@@ -1,7 +1,8 @@
 #include "RLInterpreter.h"
 
-std::ofstream* RLInterpreter::outputStream_ = NULL;
+bool RLInterpreter::outputStreamOpenedHere_ = false;
 RLProcedure* RLInterpreter::mainProc_ = NULL;
+std::ostream* RLInterpreter::outputStream_ = NULL;
 RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFunctions();
 
 void RLInterpreter::Initialization() {
@@ -19,10 +20,14 @@ void RLInterpreter::Perform() {
         throw RLPerformException(std::string("You should call RLInterpreter::Initialization() before."),0);
     else
         mainProc_->exec();
-
-    if(outputStream_ != NULL) {
-        outputStream_->close();
-        delete outputStream_; outputStream_ = NULL;
+    
+    if(outputStreamOpenedHere_) {
+        std::ofstream* outfstream = dynamic_cast<std::ofstream*>(outputStream_);
+        if(outfstream != NULL) {
+            outfstream->close();
+            delete outfstream;
+            outfstream = NULL;
+        }
     }
 }
 
@@ -54,8 +59,14 @@ RLProcedure* RLInterpreter::downStack() {
     return res;
 }
 
-void RLInterpreter::setApplicationOutput(std::string file_name) {
-    outputStream_ = new std::ofstream(file_name.c_str());
+void RLInterpreter::setApplicationOutput(std::string fname) {
+    outputStreamOpenedHere_ = true;
+    outputStream_ = new std::ofstream(fname.c_str());
+}
+
+void RLInterpreter::setApplicationOutput(std::ostream& stream) {
+    outputStreamOpenedHere_ = false;
+    outputStream_ = &stream;
 }
 
 std::ostream& RLInterpreter::getApplicationOutput() {

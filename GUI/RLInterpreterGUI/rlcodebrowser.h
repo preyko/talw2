@@ -2,6 +2,8 @@
 #define RLCODEBROWSER_H
 
 #include <QFrame>
+#include <QWidget>
+#include <QScrollBar>
 
 #include <QFile>
 #include <QVector>
@@ -35,12 +37,6 @@ public:
 
 public slots:
     void lineNumberChanged();
-
-    void scrollBarActivate();
-    void scrollBarDesctivate();
-
-    void scrollBySlider(int val);
-    void scrollByCb(int val);
 
 private:
     Ui::RLCodeBrowser *ui;

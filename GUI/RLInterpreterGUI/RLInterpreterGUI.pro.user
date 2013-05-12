@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by Qt Creator 2.4.1, 2013-05-07T17:49:40. -->
+<!-- Written by Qt Creator 2.4.1, 2013-05-12T03:07:24. -->
 <qtcreator>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -29,7 +29,7 @@
    <value type="int" key="EditorConfiguration.IndentSize">4</value>
    <value type="bool" key="EditorConfiguration.MouseNavigation">true</value>
    <value type="int" key="EditorConfiguration.PaddingMode">1</value>
-   <value type="bool" key="EditorConfiguration.ScrollWheelZooming">true</value>
+   <value type="bool" key="EditorConfiguration.ScrollWheelZooming">false</value>
    <value type="int" key="EditorConfiguration.SmartBackspaceBehavior">0</value>
    <value type="bool" key="EditorConfiguration.SpacesForTabs">true</value>
    <value type="int" key="EditorConfiguration.TabKeyBehavior">0</value>
@@ -38,7 +38,7 @@
    <value type="int" key="EditorConfiguration.Utf8BomBehavior">1</value>
    <value type="bool" key="EditorConfiguration.addFinalNewLine">true</value>
    <value type="bool" key="EditorConfiguration.cleanIndentation">true</value>
-   <value type="bool" key="EditorConfiguration.cleanWhitespace">true</value>
+   <value type="bool" key="EditorConfiguration.cleanWhitespace">false</value>
    <value type="bool" key="EditorConfiguration.inEntireDocument">false</value>
   </valuemap>
  </data>
@@ -256,7 +256,7 @@
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.EnvironmentId</variable>
-  <value type="QString">{85267343-71fe-447b-b4d3-d6078742fc0d}</value>
+  <value type="QString">{63f3becd-f6e0-4603-bb00-4bb0089257e5}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.Updater.FileVersion</variable>

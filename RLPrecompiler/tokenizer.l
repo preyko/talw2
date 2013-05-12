@@ -1,7 +1,7 @@
 %option noyywrap
 
 %top{
-#include <stdio.h>
+#include <fstream>
 
 #include "RLTokenizer.h"
 
@@ -9,8 +9,31 @@
 #define RLNAMESPACE_BEGIN namespace RLTokenizer {
 #define RLNAMESPACE_END }
 
+
+namespace RLTokenizer {
+std::ostream* tokenOutput_ = NULL;
+
+std::ostream& getTokenizerOutput() {
+    if(tokenOutput_ == NULL)
+        return std::cout;
+    else
+        return *tokenOutput_;
+}
+
+bool streamOpenedHere_ = false;
+
+void setTokenizerOutput(std::ostream& ostr) {
+    streamOpenedHere_ = false;
+    tokenOutput_ = &ostr;
+}
+
+void setTokenizerOutput(std::string filename) {
+    streamOpenedHere_ = true;
+    tokenOutput_ = new std::ofstream(filename.c_str());
+}
+}
+
 RLNAMESPACE_BEGIN
-FILE* token_output;
 }
 
 %x LINE_COMMENT MULTILINE_COMMENT
@@ -18,50 +41,50 @@ FILE* token_output;
 <INITIAL>
 {
 	/* Constants */
-T|F                     fprintf(token_output,"BOOLC,val=%s ",yytext);
-[0-9]+                  fprintf(token_output,"NUMBC,val=%s ",yytext);
-\-[0-9]+                fprintf(token_output,"NUMBC,val=%s ",yytext);
+T|F                     getTokenizerOutput() << "BOOLC,val=" << yytext << " ";
+[0-9]+                  getTokenizerOutput() << "NUMBC,val=" << yytext << " ";
+\-[0-9]+                getTokenizerOutput() << "NUMBC,val=" << yytext << " ";
 
 	/* Variable identifier */
-\~[0-9]+                fprintf(token_output,"MARKI,id=%s ",&yytext[1]);
-\$[0-9]+                fprintf(token_output,"PROCI,id=%s ",&yytext[1]);
-\.[0-9]+                fprintf(token_output,"BOOLI,id=%s ",&yytext[1]);
-\,[0-9]+                fprintf(token_output,"NUMBI,id=%s ",&yytext[1]);
+\~[0-9]+                getTokenizerOutput() << "MARKI,id=" << &yytext[1] << " ";
+\$[0-9]+                getTokenizerOutput() << "PROCI,id=" << &yytext[1] << " ";
+\.[0-9]+                getTokenizerOutput() << "BOOLI,id=" << &yytext[1] << " ";
+\,[0-9]+                getTokenizerOutput() << "NUMBI,id=" << &yytext[1] << " ";
 
 	/* Operators */
-\<\-                    fprintf(token_output,"ASSIGN ");
-eq                      fprintf(token_output,"COMPARE ");
+\<\-                    getTokenizerOutput() << "ASSIGN ";
+eq                      getTokenizerOutput() << "COMPARE ";
 
-\,\#[0-9]+              fprintf(token_output,"NUMBI,id=%s INC ",&yytext[2]);
-\,\*[0-9]+              fprintf(token_output,"NUMBI,id=%s DEC ",&yytext[2]);
+\,\#[0-9]+              getTokenizerOutput() << "NUMBI,id=" << &yytext[2] << " INC ";
+\,\*[0-9]+              getTokenizerOutput() << "NUMBI,id=" << &yytext[2] << " DEC ";
 
-\.\#[0-9]+              fprintf(token_output,"BOOLI,id=%s NOR ",&yytext[2]);
+\.\#[0-9]+              getTokenizerOutput() << "BOOLI,id=" << &yytext[2] << " NOR ";
 
-\|                      fprintf(token_output,"IF ");
+\|                      getTokenizerOutput() << "IF ";
 
-please                  fprintf(token_output,"PLEASE ");
+please                  getTokenizerOutput() << "PLEASE ";
 
-\@                      fprintf(token_output,"LINK ");
-\%                      fprintf(token_output,"RLINK ");
+\@                      getTokenizerOutput() << "LINK ";
+\%                      getTokenizerOutput() << "RLINK ";
 
-print                   fprintf(token_output,"PRINT ");
+print                   getTokenizerOutput() << "PRINT ";
 
 
 
 	/* DELIMETRS */
-\{                      fprintf(token_output,"OFBRACE ");
-\}                      fprintf(token_output,"EFBRACE ");
-\[                      fprintf(token_output,"OSBRACE ");
-\]                      fprintf(token_output,"ESBRACE ");
-\(                      fprintf(token_output,"OBRACE ");
-\)                      fprintf(token_output,"EBRACE ");
-;                       fprintf(token_output,"SEMICOLON ");
+\{                      getTokenizerOutput() << "OFBRACE ";
+\}                      getTokenizerOutput() << "EFBRACE ";
+\[                      getTokenizerOutput() << "OSBRACE ";
+\]                      getTokenizerOutput() << "ESBRACE ";
+\(                      getTokenizerOutput() << "OBRACE ";
+\)                      getTokenizerOutput() << "EBRACE ";
+;                       getTokenizerOutput() << "SEMICOLON ";
 
-\n                      yylineno++; fprintf(token_output,"\n");
-[ \t]+                  fprintf(token_output," ");
+\n                      yylineno++; getTokenizerOutput() << "\n";
+[ \t]+                  getTokenizerOutput() << " ";
 
     /* ERRTOKEN */
- .                      fprintf(token_output,"ERRTOKEN '%s' on line #%d. ",yytext,yylineno);
+ .                      getTokenizerOutput() << "ERRTOKEN '" << yytext << "' on line #" << yylineno;
 
     /* Commentaries */
 \/\/                    BEGIN(LINE_COMMENT);
@@ -84,32 +107,34 @@ print                   fprintf(token_output,"PRINT ");
 RLNAMESPACE_END
 
 namespace RLTokenizer {
-    void Tokenize(FILE* input, FILE* output) {
-        yyin = input;
-        token_output = output;
 
+void Tokenize(const char* input) {
+    yyin = fopen(input,"r");
+
+    if(yyin == NULL)
+        throw Exception(std::string("Can't open file called ") +
+                        std::string(input));
+
+    do {
         yylex();
+    } while(!feof(yyin));
+    
+    if(streamOpenedHere_) {
+        std::ofstream* tmp = dynamic_cast<std::ofstream*>(tokenOutput_);
+        if(tmp != NULL) {
+            tmp->close();
+            delete tmp;
+            tmp = NULL;
+        }
+    } else {
+        std::ofstream* tmp = dynamic_cast<std::ofstream*>(tokenOutput_);
+        if(tmp != NULL) {
+            tmp->close();
+        }
     }
 
-    void Tokenize(const char* input, const char* output) {
-        FILE* in;
-        FILE* out;
-
-        in = fopen(input,"r");
-        out = fopen(output,"w");
-
-        if(in == NULL)
-            throw Exception(std::string("Can't open file called ") +
-                            std::string(input));
-        if(out == NULL)
-            throw Exception(std::string("Can't create file with name ") +
-                            std::string(output));
-
-        Tokenize(in,out);
-
-        fclose(in);
-        fclose(out);
-    }
+    fclose(yyin);
+}
 }
 
 

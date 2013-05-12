@@ -9,17 +9,13 @@ RLCodeBrowser::RLCodeBrowser(QWidget *parent) :
     ui->setupUi(this);
 
     ui->lineViewer->installEventFilter(this);
-    ui->scroll->installEventFilter(this);
 
     //connect(ui->scroll,SIGNAL(valueChanged(int)),ui->codeBrowser->verticalScrollBar(),SLOT(setValue(int)));
     //connect(ui->scroll,SIGNAL(valueChanged(int)),ui->lineViewer->verticalScrollBar(),SLOT(setValue(int)));
     connect(ui->codeBrowser,SIGNAL(textChanged()),SLOT(lineNumberChanged()));
 
-    connect(ui->scroll,SIGNAL(sliderPressed()),SLOT(scrollBarActivate()));
-    connect(ui->scroll,SIGNAL(sliderReleased()),SLOT(scrollBarDesctivate()));
-
-    connect(ui->scroll,SIGNAL(valueChanged(int)),SLOT(scrollBySlider(int)));
-    connect(ui->codeBrowser->verticalScrollBar(),SIGNAL(valueChanged(int)),SLOT(scrollByCb(int)));
+    connect(ui->codeBrowser->verticalScrollBar(),SIGNAL(valueChanged(int)),
+            ui->lineViewer->verticalScrollBar(),SLOT(setValue(int)));
 
     scrollBarActive_ = false;
 
@@ -47,12 +43,6 @@ void RLCodeBrowser::clear() {
 }
 
 bool RLCodeBrowser::eventFilter(QObject* target, QEvent* ev) {
-    if(target == ui->scroll && ev->type()==QEvent::Wheel) {
-        int val = ui->scroll->value();
-        ui->lineViewer->verticalScrollBar()->setValue(val);
-        ui->codeBrowser->verticalScrollBar()->setValue(val);
-        return false;
-    }
     return false;
 }
 
@@ -93,35 +83,5 @@ void RLCodeBrowser::lineNumberChanged() {
         for(int i=1;i<=currentLineCount_;i++) {
             ui->lineViewer->append(QString::number(i));
         }
-
-        ui->scroll->setRange(0,currentLineCount_);
     }
-}
-
-void RLCodeBrowser::scrollBarActivate() {
-    scrollBarActive_ = true;
-}
-
-void RLCodeBrowser::scrollBarDesctivate() {
-    scrollBarActive_ = false;
-}
-
-void RLCodeBrowser::scrollBySlider(int val) {
-    if(!scrollBarActive_) return;
-
-    int cval = double(val)*(ui->codeBrowser->verticalScrollBar()->maximum()-
-                            ui->codeBrowser->verticalScrollBar()->minimum())/currentLineCount_;
-
-    ui->lineViewer->verticalScrollBar()->setValue(cval);
-    ui->codeBrowser->verticalScrollBar()->setValue(cval);
-}
-
-void RLCodeBrowser::scrollByCb(int val) {
-    if(scrollBarActive_) return;
-
-    int cval = double(val)/(ui->codeBrowser->verticalScrollBar()->maximum()-
-                            ui->codeBrowser->verticalScrollBar()->minimum())*currentLineCount_;
-
-    ui->lineViewer->verticalScrollBar()->setValue(val);
-    ui->scroll->setValue(cval);
 }

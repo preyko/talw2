@@ -12,16 +12,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    rlcodebrowser.cpp
+    rlcodebrowser.cpp \
+    RLOStream.cpp
 
 HEADERS  += mainwindow.h \
-    rlcodebrowser.h
+    rlcodebrowser.h \
+    RLOStream.h
+
 
 FORMS    += mainwindow.ui \
     rlcodebrowser.ui
 
-symbian: LIBS += -lrlprecomp
-else:unix|win32: LIBS += -L$$PWD/../../RLPrecompiler/build/ -lrlprecomp
+unix|win32: LIBS += -L$$PWD/../../RLPrecompiler/build/ -lrlprecomp
 
 INCLUDEPATH += $$PWD/../../RLPrecompiler
 DEPENDPATH += $$PWD/../../RLPrecompiler

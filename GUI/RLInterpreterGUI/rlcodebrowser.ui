@@ -48,6 +48,12 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::NoContextMenu</enum>
+       </property>
        <property name="styleSheet">
         <string notr="true">background:rgb(212, 212, 212);
 font: 11pt &quot;Ubuntu Mono&quot;;</string>
@@ -78,20 +84,13 @@ font: 11pt &quot;Ubuntu Mono&quot;;</string>
         <enum>QFrame::NoFrame</enum>
        </property>
        <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+        <enum>Qt::ScrollBarAsNeeded</enum>
        </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAsNeeded</enum>
        </property>
        <property name="readOnly">
         <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QScrollBar" name="scroll">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
        </property>
       </widget>
      </item>
