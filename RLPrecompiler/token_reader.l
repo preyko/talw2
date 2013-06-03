@@ -149,7 +149,7 @@ MAZESCHEME                      return MAZESCHEME;
 VISITEDPLACE                    return VISITEDPLACE;
 ROBOPOS                         return ROBOPOS;
 
-SHOWMAZE                       return SHOWMAZE;
+SHOWMAZE                       	return SHOWMAZE;
 
 [\t ]+                          {
 

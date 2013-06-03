@@ -130,7 +130,21 @@ RLCommandPrototype* RLRoboCommands::copy() const {
 }
 
 RLTypePrototype* RLRoboCommands::exec() const {
-    return (new RLBool(RLRoboMaze::moveRobot(action_)))->markAsTemp();
+	switch(action_) {
+		case RLRoboMaze::showmaze:
+			RLRoboMaze::showMaze();
+			return NULL;
+		break;
+		case RLRoboMaze::getrobopos:
+			RLRoboMaze::RoboPosition pos = RLRoboMaze::getRoboPosition();
+			RLArray* posarr = new RLArray(1,RLTypePrototype::Number);
+			posarr->setElem(1,new RLNumber(pos.x));
+			posarr->setElem(2,new RLNumber(pos.y));
+			return posarr;
+		break;
+	}
+	
+	return (new RLBool(RLRoboMaze::moveRobot(action_)))->markAsTemp();
 }
 
 /*

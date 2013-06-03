@@ -9,34 +9,31 @@ RLRoboMaze::MazeSize RLRoboMaze::mazeSize_ = RLRoboMaze::MazeSize();
 bool RLRoboMaze::moveRobot(RLRoboMaze::Action action) {
     switch(action) {
         case mdown:
-        if(mazeScheme_.at(positionOfRobot_.x).at(positionOfRobot_.y+1) == 0)
-            positionOfRobot_.y++;
-            return true;
+        if(getCellState(positionOfRobot_.x,positionOfRobot_.y+1) > -1)
+            return setRoboPosition(positionOfRobot_.x,positionOfRobot_.y++);
         break;
         case mup:
-        if(mazeScheme_.at(positionOfRobot_.x).at(positionOfRobot_.y-1) == 0)
-            positionOfRobot_.y--;
-            return true;
+        if(getCellState(positionOfRobot_.x,positionOfRobot_.y-1) > -1)
+            return setRoboPosition(positionOfRobot_.x,positionOfRobot_.y--);
         break;
         case mleft:
-        if(mazeScheme_.at(positionOfRobot_.x-1).at(positionOfRobot_.y) == 0)
-            positionOfRobot_.x--;
-            return true;
+        if(getCellState(positionOfRobot_.x-11,positionOfRobot_.y) > -1)
+            return setRoboPosition(positionOfRobot_.x--,positionOfRobot_.y);
         break;
         case mright:
-        if(mazeScheme_.at(positionOfRobot_.x+1).at(positionOfRobot_.y) == 0)
-            positionOfRobot_.x++;
-            return true;
+        if(getCellState(positionOfRobot_.x+1,positionOfRobot_.y) > -1)
+            return setRoboPosition(positionOfRobot_.x++,positionOfRobot_.y);
         break;
         case tp:
             for(int i = 0; i< 255; i++) {
                 int x = rand() % mazeSize_.w;
                 int y = rand() % mazeSize_.h;
+                
+                if(x > mazeSize_.w || y > mazeSize_.h || x < 0 || y < 0)
+					return false;
 
                 if(mazeScheme_.at(x).at(y) == 0) {
-                    positionOfRobot_.x = x;
-                    positionOfRobot_.y = y;
-                    return true;
+                    return setRoboPosition(x,y);
                 }
             }
         default:
@@ -50,15 +47,21 @@ RLRoboMaze::RoboPosition RLRoboMaze::getRoboPosition() {
 }
 
 void RLRoboMaze::setMazeSize(int w, int h) {
-    mazeScheme_.resize(w);
-    mazeVisited_.resize(w);
+    mazeScheme_.resize(w,0);
+    mazeVisited_.resize(w,0);
     for(int i = 0; i < mazeScheme_.size(); i++) {
         mazeScheme_[i].resize(h);
         mazeVisited_[i].resize(h);
     }
 }
 
-bool RLRoboMaze::setRoboPos(int x, int y) {
+int RLRoboMaze::getCellState(int x, int y) {
+	if(x > mazeSize_.w || y > mazeSize_.h || x < 0 || y < 0)
+        return -1;
+	return mazeScheme_.at(x).at(y);
+}
+	
+bool RLRoboMaze::setRoboPosition(int x, int y) {
     if(x > mazeSize_.w || y > mazeSize_.h || x < 0 || y < 0)
         return false;
 

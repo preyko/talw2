@@ -6,7 +6,7 @@
 
 class RLRoboMaze {
 public:
-    enum Action { mup, mdown, mleft, mright, tp };
+    enum Action { mup, mdown, mleft, mright, tp, getrobopos, showmaze };
 
     typedef struct { int w; int h; } MazeSize;
     typedef struct { int x; int y; } RoboPosition;
@@ -15,9 +15,10 @@ public:
     static bool moveRobot(Action action);
 
     static RoboPosition getRoboPosition();
+    static bool setRoboPosition(int x, int y);
+    static int getCellState(int x, int y);
 
     static void setMazeSize(int w, int h);
-    static bool setRoboPos(int x, int y);
 
     static void showMaze();
 

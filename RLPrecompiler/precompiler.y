@@ -140,6 +140,11 @@ nonreturnable:
     PRINT returnable SEMICOLON {
         $$.command = new RLCommand(show,$2.command);
     }
+    |
+    SHOWMAZE SEMICOLON {
+		$$.command = new RLRoboCommands(RLRoboMaze::showmaze);
+	}
+	;
 
 returnable:
     ident ASSIGN returnable {
@@ -203,6 +208,10 @@ robo_commands:
     TP {
         $$.command = new RLRoboCommands(RLRoboMaze::tp);
     }
+    |
+    ROBOPOS {
+		$$.command = new RLRoboCommands(RLRoboMaze::getrobopos);
+	}
     ;
 
 ident:
