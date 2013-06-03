@@ -15,3 +15,5 @@ RLPrecompiler/precompiler_head
 RLPrecompiler/precompiler_tail
 RLPrecompiler/precompilerhh_head
 RLPrecompiler/precompilerhh_tail
+rlinterpreter/RLRoboMaze.h
+rlinterpreter/RLRoboMaze.cpp

@@ -7,6 +7,10 @@
 /*
  * class RLCommandPrototype
  */
+RLTypePrototype *RLCommandPrototype::getFinalLeft() {
+    return NULL;
+}
+
 void RLCommandPrototype::setLinePosition(int line) {
     linePosition_ = line;
 }
@@ -45,6 +49,10 @@ RLCommandPrototype* RLDereference::copy() const {
 
 RLTypePrototype* RLDereference::exec() const {
     value_->performLinkedProcedures();
+    return value_;
+}
+
+RLTypePrototype* RLDereference::getFinalLeft() {
     return value_;
 }
 
@@ -96,6 +104,10 @@ RLTypePrototype* RLCommand::exec() const {
     return exec_();
 }
 
+RLTypePrototype* RLCommand::getFinalLeft() {
+    return first_->getFinalLeft();
+}
+
 RLTypePrototype* RLCommand::exec_() const {
     if(first_==NULL && second_==NULL) {
         return (new RLBool(false))->markAsTemp();
@@ -104,6 +116,21 @@ RLTypePrototype* RLCommand::exec_() const {
     } else {
         return first_->exec()->applyBinary(operator_,second_->exec());
     }
+}
+
+/*
+ * class RLRoboCommands : public RLCommandPrototype
+ */
+RLRoboCommands::RLRoboCommands(RLRoboMaze::Action action) {
+    action_ = action;
+}
+
+RLCommandPrototype* RLRoboCommands::copy() const {
+    return new RLRoboCommands(action_);
+}
+
+RLTypePrototype* RLRoboCommands::exec() const {
+    return (new RLBool(RLRoboMaze::moveRobot(action_)))->markAsTemp();
 }
 
 /*
@@ -229,15 +256,4 @@ RLTypePrototype* RLCycle::exec() const {
 
 RLCommandPrototype* RLCycle::copy() const {
     return new RLCycle(effect_,condition_);
-}
-
-
-
-// Debug
-RLCommandPrototype* RLPrintAll::copy() const {
-    return new RLPrintAll();
-}
-
-RLTypePrototype* RLPrintAll::exec() const {
-    RLIdentRegister::showAll();
 }

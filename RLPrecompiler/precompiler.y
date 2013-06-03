@@ -1,5 +1,7 @@
 %{
-#define YYSTYPE RLCommandPrototype*
+
+#define YYSTYPE_IS_DECLARED
+#define YYSTYPE TokenDescriptor
 
 YYSTYPE yyval;
 extern int yydebug;
@@ -35,7 +37,6 @@ void Precompile(const char* token_input) {
     #elseif
     yydebug = 0;
     #endif
-    yydebug = 1;
     
     RLInterpreter::Initialization();
 
@@ -61,18 +62,10 @@ void Precompile(const char* token_input) {
     }
 }
 
-struct ArrayInfo {
-    int rootDepth;
-    RLArray* nArray;
-    RLTypePrototype::RLTypeQualifier rootType;
-};
-
-ArrayInfo arrayInfo_{0,NULL,RLTypePrototype::Number};
-
 %}
 
 %debug
-%start procedure
+%start command_c
 %token OBRACE EBRACE OFBRACE EFBRACE OSBRACE ESBRACE SEMICOLON // DELIMETRS
 BOOLI NUMBI MARKI PROCI // IDENTIFIER
 BOOLARRAY NUMBARRAY PROCARRAY // ARRAYS
@@ -82,6 +75,15 @@ IF
 PRINT PRINTALL PLEASE
 EOC
 
+// Command for robot
+MOVEUP MOVEDOWN MOVELEFT MOVERIGHT TP
+
+// Params of maze and robot
+MAZESCHEME      // Represented by a two dimensional array, every element of this array is boolean type. True - occupied place, false - not occupied place.
+VISITEDPLACE    // Same as MAZESCHEME, but true - place was visited, vice versa - not.
+ROBOPOS         // Represented by 2-elements array, first - X cooardinate, second - Y cooardinate.
+SHOWMAZE        // Show maze/
+
 %right COMPARE
 %right ASSIGN
 
@@ -90,10 +92,10 @@ EOC
 %right OSBRACE
 
 %%
-procedure:
-    procedure command
+command_c:
+    command_c command
     |
-    procedure EOC {
+    command_c EOC {
         return 0;
     }
     |
@@ -101,99 +103,120 @@ procedure:
 
 command:
     returnable SEMICOLON {
-        if($1!=NULL)
-            $1->setLinePosition(yylineno);
-        RLInterpreter::addCommand($1);
+        if($1.command!=NULL)
+            $1.command->setLinePosition(yylineno);
+        RLInterpreter::addCommand($1.command);
     }
     |
     nonreturnable  {
-        if($1!=NULL)
-            $1->setLinePosition(yylineno);
-        RLInterpreter::addCommand($1);
+        if($1.command!=NULL)
+            $1.command->setLinePosition(yylineno);
+        RLInterpreter::addCommand($1.command);
     }
     ;
 
 nonreturnable:
-    rcondition procedure_declaration {
-        $$ = new RLCycle(new RLCommand(perform,$2),$1);
+    rcondition command_c_declaration {
+        $$.command = new RLCycle($2.command,$1.command);
     }
     |
-    IF rcondition procedure_declaration {
-        $$ = new RLConditional(new RLCommand(perform,$3),$2);
+    IF rcondition command_c_declaration {
+        $$.command = new RLConditional($3.command,$2.command);
     }
     |
     rcondition command {
-	$$ = new RLCycle($2,$1);
+        $$.command = new RLCycle($2.command,$1.command);
     }
     |
     IF rcondition command {
-	$$ = new RLConditional($3,$2);
+        $$.command = new RLConditional($3.command,$2.command);
     }
     |
     OSBRACE returnable ESBRACE OSBRACE PLEASE ESBRACE OSBRACE MARKI ESBRACE SEMICOLON {
         //collectionerOfExceptions.add(Exception(std::string("Now this doesn't work."),yylineno));
-        $$ = new RLConditional(new RLCommand(maketransition,$8),$2);
+        $$.command = new RLConditional(new RLCommand(maketransition,$8.command),$2.command);
     }
     |
     PRINT returnable SEMICOLON {
-        $$ = new RLCommand(show,$2);
+        $$.command = new RLCommand(show,$2.command);
     }
-    |
-    PRINTALL SEMICOLON {
-	$$ = new RLPrintAll();
-    }
-    ;
 
 returnable:
     ident ASSIGN returnable {
-        $$ = new RLCommand(assign,$1,$3);
+        $$.command = new RLCommand(assign,$1.command,$3.command);
     }
     |
     returnable COMPARE returnable {
-        $$ = new RLCommand(compare,$1,$3);
+        $$.command = new RLCommand(compare,$1.command,$3.command);
     }
     |
     const {
-        $$ = $1;
+        $$.command = $1.command;
     }
     |
     ident {
-        $$ = $1;
+        $$.command = $1.command;
     }
     |
-    procedure_declaration {
-        $$ = $1;
+    command_c_declaration {
+        $$.command = $1.command;
     }
     |
     ident INC {
-        $$ = new RLCommand(increment,$1);
+        $$.command = new RLCommand(increment,$1.command);
     }
     |
     ident DEC {
-        $$ = new RLCommand(decrement,$1);
+        $$.command = new RLCommand(decrement,$1.command);
     }
     |
     ident LINK ident {
-        $$ = new RLCommand(bind,$1,$3);
+        $$.command = new RLCommand(bind,$1.command,$3.command);
     }
     |
     ident RLINK ident {
-        $$ = new RLCommand(unbind,$1,$3);
+        $$.command = new RLCommand(unbind,$1.command,$3.command);
+    }
+    |
+    robo_commands {
+        $$.command = $1.command;
+    }
+    ;
+
+robo_commands:
+    MOVEUP  {
+        $$.command = new RLRoboCommands(RLRoboMaze::mup);
+    }
+    |
+    MOVEDOWN {
+        $$.command = new RLRoboCommands(RLRoboMaze::mdown);
+    }
+    |
+    MOVELEFT {
+        $$.command = new RLRoboCommands(RLRoboMaze::mleft);
+    }
+    |
+    MOVERIGHT {
+        $$.command = new RLRoboCommands(RLRoboMaze::mright);
+    }
+    |
+    TP {
+        $$.command = new RLRoboCommands(RLRoboMaze::tp);
     }
     ;
 
 ident:
     BOOLI {
-        if(RLIdentRegister::get(int($1))==NULL)
-            $$ = new RLDereference(new RLBool(false,int($1)));
+        if(RLIdentRegister::get($1.number)==NULL)
+            $$.command = new RLDereference(new RLBool(false,$1.number));
         else {
-            RLTypePrototype* res = RLIdentRegister::get(int($1));
+            RLTypePrototype* res = RLIdentRegister::get($1.number);
             if(res->getTypeQualifier() == RLTypePrototype::Bool)
-                $$ = new RLDereference(res);
+                $$.command = new RLDereference(res);
             else if(res->getTypeQualifier() == RLTypePrototype::Array) {
 		RLArray* arr = (RLArray*)res;
 		if(arr->getRootQualifier() == RLTypePrototype::Bool) {
-		    $$ = new RLDereference(res);
+                    $$.command = new RLDereference(res);
 		} else
 		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
                                        RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
@@ -205,16 +228,16 @@ ident:
     }
     |
     NUMBI {
-        if(RLIdentRegister::get(int($1))==NULL)
-            $$ = new RLDereference(new RLNumber(0,int($1)));
+        if(RLIdentRegister::get($1.number)==NULL)
+            $$.command = new RLDereference(new RLNumber(0,$1.number));
         else {
-	    RLTypePrototype* res = RLIdentRegister::get(int($1));
+            RLTypePrototype* res = RLIdentRegister::get($1.number);
 	    if(res->getTypeQualifier() == RLTypePrototype::Number)
-		$$ = new RLDereference(res);
+                $$.command = new RLDereference(res);
 	    else if(res->getTypeQualifier() == RLTypePrototype::Array) {
 		RLArray* arr = (RLArray*)res;
 		if(arr->getRootQualifier() == RLTypePrototype::Number) {
-		    $$ = new RLDereference(res);
+                    $$.command = new RLDereference(res);
 		} else
 		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
 				       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
@@ -226,16 +249,16 @@ ident:
     }
     |
     PROCI {
-        if(RLIdentRegister::get(int($1))==NULL)
-            $$ = new RLDereference(new RLProcedure(int($1)));
+        if(RLIdentRegister::get($1.number)==NULL)
+            $$.command = new RLDereference(new RLProcedure($1.number));
         else {
-	    RLTypePrototype* res = RLIdentRegister::get(int($1));
+            RLTypePrototype* res = RLIdentRegister::get($1.number);
 	    if(res->getTypeQualifier() == RLTypePrototype::Procedure)
-		$$ = new RLDereference(res);
+                $$.command = new RLDereference(res);
 	    else if(res->getTypeQualifier() == RLTypePrototype::Array) {
 		RLArray* arr = (RLArray*)res;
 		if(arr->getRootQualifier() == RLTypePrototype::Procedure) {
-		    $$ = new RLDereference(res);
+                    $$.command = new RLDereference(res);
 		} else
 		    collectionerOfExceptions.add(Exception(std::string("Expected array of type RL") +
 				       RLTypePrototype::typeName(res->getTypeQualifier()),yylineno));
@@ -247,118 +270,129 @@ ident:
     }
     |
     MARKI {
-        if(RLIdentRegister::get(int($1))!=NULL)
+        if(RLIdentRegister::get($1.number)!=NULL)
             collectionerOfExceptions.add(Exception(std::string("This mark declared before."),yylineno));
         else
-            new RLMark(RLInterpreter::getCurrentFunction(),RLInterpreter::getCurrentFunction()->getSize(),int($1));
-            $$ = NULL;
+            //new RLMark(RLInterpreter::getCurrentFunction(),RLInterpreter::getCurrentFunction()->getSize(),$1.number);
+            $$.command = NULL;
     }
     |
     array {
-	$$ = $1;
+        $$.command = $1.command;
     }
     ;
 
 array:
     array_rep {
-	if(arrayInfo_.nArray != NULL) {
-	    arrayInfo_.nArray->setRootDepth(arrayInfo_.rootDepth);
-	    arrayInfo_.nArray = NULL;
-	} else {
-	    $$ = $1;
-	}
+        if($1.arrayDescriptor->isNew) {
+            $1.arrayDescriptor->nArray->setRootDepth($1.arrayDescriptor->rootDepth);
+        }
+        std::vector<RLCommandPrototype*>& commands = $1.arrayDescriptor->commandForWrapping;
+
+        $$.command = new RLDereference($1.arrayDescriptor->nArray);
+        for(int i = 0; i < commands.size(); i++) {
+            $$.command = new RLCommand(arrayat,$$.command,commands[i]);
+        }
+
+        delete $1.arrayDescriptor;
     }
     ;
     
 array_rep:
     array_rep array_end {
-	if(arrayInfo_.nArray != NULL) {
-	    arrayInfo_.rootDepth++;
-	}
-	$$ = new RLCommand(arrayat,$1,$2);
+        if($1.arrayDescriptor->isNew) {
+            $1.arrayDescriptor->rootDepth++;
+        }
+        $1.arrayDescriptor->commandForWrapping.push_back($2.command);
     }
     |
     array_rep array_index {
-	if(arrayInfo_.nArray != NULL) {
-	    arrayInfo_.rootDepth++;
+        if($1.arrayDescriptor->isNew) {
+            $1.arrayDescriptor->rootDepth++;
 	}
-        $$ = new RLCommand(arrayat,$1,$2);
+        $1.arrayDescriptor->commandForWrapping.push_back($2.command);
     }
     |
     array_start {
-	if(RLIdentRegister::get((int)$1)==NULL) {
-	    if(arrayInfo_.nArray == NULL) {
-		arrayInfo_.rootDepth = 1;
-		arrayInfo_.nArray = new RLArray(0,arrayInfo_.rootType,(int)$1);
-		$$ = new RLDereference(arrayInfo_.nArray);
-	    } else {
-		collectionerOfExceptions.add(Exception(std::string("Declaration of arrays inside another declaration not allowed."),yylineno));
-	    }
+        if(RLIdentRegister::get($1.arrayDescriptor->id)==NULL) {
+            $1.arrayDescriptor->nArray = new RLArray(0,$1.arrayDescriptor->rootType,$1.arrayDescriptor->id);
+            $1.arrayDescriptor->isNew = true;
+            //collectionerOfExceptions.add(Exception(std::string("Declaration of arrays inside another declaration not allowed."),yylineno));
 	} else {
-	    RLTypePrototype* res = RLIdentRegister::get((int)$1);
-	    $$ = new RLDereference(res);
+            RLTypePrototype* res = RLIdentRegister::get($1.arrayDescriptor->id);
+            //$$.command = new RLDereference(res);
+            $1.arrayDescriptor->nArray = res;
+            $1.arrayDescriptor->isNew = false;
 	}
-	//$$ = new RLCommand(arrayat,$$,$2);
+        $$ = $1;
     }
     ;
 
 array_start:
     BOOLARRAY {
-	arrayInfo_.rootType = RLTypePrototype::Bool;
-        $$ = $1;
+        $$.arrayDescriptor = new ArrayDescriptor;
+
+        $$.arrayDescriptor->id = $1.number;
+        $$.arrayDescriptor->rootDepth = 1;
+        $$.arrayDescriptor->rootType = RLTypePrototype::Bool;
     }
     |
     NUMBARRAY {
-	arrayInfo_.rootType = RLTypePrototype::Number;
-        $$ = $1;
+        $$.arrayDescriptor = new ArrayDescriptor;
+
+        $$.arrayDescriptor->id = $1.number;
+        $$.arrayDescriptor->rootDepth = 1;
+        $$.arrayDescriptor->rootType = RLTypePrototype::Number;
     }
     |
     PROCARRAY {
-	arrayInfo_.rootType = RLTypePrototype::Procedure;
-        $$ = $1;
+        $$.arrayDescriptor = new ArrayDescriptor;
+
+        $$.arrayDescriptor->id = $1.number;
+        $$.arrayDescriptor->rootDepth = 1;
+        $$.arrayDescriptor->rootType = RLTypePrototype::Procedure;
     }
     ;
 array_end:
     returnable ESBRACE {
-	$$ = $1;
+        $$.command = $1.command;
     }
     ;
 array_index:
     returnable ESBRACE OSBRACE {
-	$$ = $1;
+        $$.command = $1.command;
     }
     ;
 
 const:
     BOOLC {
-        $$ = new RLDereference((new RLBool((int)$1==1))->markAsConst());
+        $$.command = new RLDereference((new RLBool($1.number==1))->markAsConst());
     }
     |
     NUMBC {
-        $$ = new RLDereference((new RLNumber((int)$1))->markAsConst());
+        $$.command = new RLDereference((new RLNumber($1.number))->markAsConst());
     }
     ;
 
 rcondition:
     OBRACE returnable EBRACE {
-        $$ = $2;
+        $$.command = $2.command;
     }
     ;
 
 
-procedure_declaration:
-    start_procedure procedure end_procedure {
-        $$ = new RLDereference(
-        RLInterpreter::getCurrentFunction());
+command_c_declaration:
+    start_command_c command_c end_command_c {
+        $$.command = RLInterpreter::getCurrentFunction();
         RLInterpreter::downStack();
     }
     ;
 
-start_procedure:
+start_command_c:
     OFBRACE {
         RLInterpreter::upStack();
     }
     ;
-end_procedure:
+end_command_c:
     EFBRACE {
     }

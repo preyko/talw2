@@ -72,7 +72,17 @@ please                  getTokenizerOutput() << "PLEASE ";
 print                   getTokenizerOutput() << "PRINT ";
 printall                getTokenizerOutput() << "PRINTALL ";
 
+        /* Robocommands */
+rup                     getTokenizerOutput() << "MOVEUP ";
+rdown                   getTokenizerOutput() << "MOVEDOWN ";
+rleft                   getTokenizerOutput() << "MOVELEFT ";
+rright                  getTokenizerOutput() << "MOVERIGHT ";
+rtp                     getTokenizerOutput() << "TP ";
+rmaze                   getTokenizerOutput() << "MAZESCHEME ";
+vp                      getTokenizerOutput() << "VISITEDPLACE ";
+rposition               getTokenizerOutput() << "ROBOPOS ";
 
+show_maze               getTokenizerOutput() << "SHOWMAZE ";
 
 	/* DELIMETRS */
 \{                      getTokenizerOutput() << "OFBRACE ";
@@ -91,13 +101,16 @@ printall                getTokenizerOutput() << "PRINTALL ";
 
     /* Commentaries */
 \/\/                    BEGIN(LINE_COMMENT);
-    /*\/\*                    BEGIN(MULTILINE_COMMENT);*/
+\/\*\/\*                BEGIN(MULTILINE_COMMENT);
 }
 
 <ERRTOKEN>
 {
 [ ]                     BEGIN(INITIAL);
-.                       exceptions_.getLast().what() += yytext;
+.                       {
+                            std::cout << exceptions_.getCollectioner().size() << std::endl;
+                            exceptions_.getLast().what() += yytext;
+                        }
 }
 
 <LINE_COMMENT>

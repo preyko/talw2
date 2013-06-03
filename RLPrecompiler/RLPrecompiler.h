@@ -2,8 +2,9 @@
 
 #include <iostream>
 #include <fstream>
-
 #include <vector>
+
+#include <RLCommand.h>
 
 namespace RLPrecompiler {
 
@@ -61,5 +62,24 @@ std::ostream& getPrecompilerOutput();
 
 void setPrecompilerOutput(std::string lo);
 void setPrecompilerOutput(std::ostream& lo);
+
+#define YYSTYPE_IS_DECLARED
+#define YYSTYPE TokenDescriptor
+
+struct ArrayDescriptor {
+    int id;
+    int rootDepth;
+    bool isNew;
+    RLArray* nArray;
+    RLTypePrototype::RLTypeQualifier rootType;
+
+    std::vector<RLCommandPrototype*> commandForWrapping;
+};
+
+union TokenDescriptor {
+    int number;
+    RLCommandPrototype* command;
+    ArrayDescriptor* arrayDescriptor;
+};
 
 }

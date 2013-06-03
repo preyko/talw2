@@ -94,10 +94,10 @@ RLOStreamIntercept::int_type RLOStreamIntercept::overflow(RLOStreamIntercept::in
 std::streamsize RLOStreamIntercept::xsputn(const char* p,std::streamsize n) {
 	mString_.append(p,p+n);
 	
-	uint pos = 0;
+    size_t pos = 0;
 	while(pos != std::string::npos) {
-		pos = mString_.find('\n');
-		if(pos != std::string::npos) {
+        pos = mString_.find('\n');
+        if(pos != std::string::npos) {
 			std::string tmp(mString_.begin(),mString_.begin() + pos);
 			emit sendInterceptedData(QString::fromStdString(tmp));
 			mString_.erase(mString_.begin(),mString_.begin() + pos + 1);

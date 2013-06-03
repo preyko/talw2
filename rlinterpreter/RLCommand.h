@@ -4,6 +4,8 @@
 #include "RLTools.h"
 #include "RLInterpreter.h"
 
+#include "RLRoboMaze.h"
+
 class RLPerformException {
 public:
     RLPerformException(std::string descr,int line) {
@@ -33,6 +35,8 @@ public:
 
     virtual RLTypePrototype* exec() const = 0;
 
+    virtual RLTypePrototype* getFinalLeft(); // Recursively return left type element  without  performing of command, placed in RLDereference.
+
     void setLinePosition(int line);
     int getLinePosition();
 
@@ -51,6 +55,8 @@ public:
 
     virtual RLTypePrototype* exec() const;
 
+    virtual RLTypePrototype* getFinalLeft();
+
 private:
     RLTypePrototype* value_;
 
@@ -67,6 +73,8 @@ public:
 
     virtual RLTypePrototype* exec() const;
 
+    virtual RLTypePrototype* getFinalLeft();
+
 protected:
     virtual RLTypePrototype* exec_() const;
 
@@ -78,6 +86,19 @@ private:
 
     void init_(RLOperator oper, int f, int s);
     void init_(RLOperator oper, RLCommandPrototype* f, RLCommandPrototype* s);
+};
+
+class RLRoboCommands : public RLCommandPrototype {
+public:
+    RLRoboCommands(RLRoboMaze::Action action);
+
+    virtual RLCommandPrototype* copy() const;
+
+    virtual RLTypePrototype* exec() const;
+
+private:
+    RLRoboMaze::Action action_;
+
 };
 
 class RLChainCommands : public RLCommandPrototype  {
@@ -135,12 +156,4 @@ public:
 private:
     static const int MaxCycleIteration_ = 250;
 
-};
-
-// Debug
-class RLPrintAll : public RLCommandPrototype {
-public:
-    virtual RLCommandPrototype* copy() const;
-
-    virtual RLTypePrototype* exec() const;    
 };

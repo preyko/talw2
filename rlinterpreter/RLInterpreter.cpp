@@ -1,16 +1,19 @@
 #include "RLInterpreter.h"
 
 bool RLInterpreter::outputStreamOpenedHere_ = false;
-RLProcedure* RLInterpreter::mainProc_ = NULL;
+RLChainCommands* RLInterpreter::mainProc_ = NULL;
 std::ostream* RLInterpreter::outputStream_ = NULL;
 RLInterpreter::StackFunctions RLInterpreter::stack_ = RLInterpreter::StackFunctions();
 
 void RLInterpreter::Initialization() {
     RLTypePrototype::killThemAll();
 
-    mainProc_ = (RLProcedure*)((new RLProcedure(-1))->markAsConst());
+    mainProc_ = new RLChainCommands();
 
     stack_.push_back(mainProc_);
+
+    RLRoboMaze::setMazeSize(10,10);
+    RLRoboMaze::setRoboPos(0,0);
 }
 
 void RLInterpreter::Perform() {
@@ -35,11 +38,11 @@ void RLInterpreter::Perform() {
     }
 }
 
-RLProcedure* RLInterpreter::getMainFunction() {
+RLChainCommands* RLInterpreter::getMainFunction() {
     return mainProc_;
 }
 
-RLProcedure* RLInterpreter::getCurrentFunction() {
+RLChainCommands* RLInterpreter::getCurrentFunction() {
     return stack_[stack_.size()-1];
 }
 
@@ -48,15 +51,15 @@ void RLInterpreter::addCommand(RLCommandPrototype* c) {
         getCurrentFunction()->addCommand(c);
 }
 
-void RLInterpreter::upStack(RLProcedure* u) {
+void RLInterpreter::upStack(RLChainCommands* u) {
     if(u==NULL)
-        u = new RLProcedure();
+        u = new RLChainCommands();
 
     stack_.push_back(u);
 }
 
-RLProcedure* RLInterpreter::downStack() {
-    RLProcedure* res = stack_[stack_.size()-1];
+RLChainCommands* RLInterpreter::downStack() {
+    RLChainCommands* res = stack_[stack_.size()-1];
 
     stack_.pop_back();
 

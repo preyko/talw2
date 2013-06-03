@@ -6,7 +6,7 @@ BUILDDIR=build
 
 INCLUDE=-I.
 
-SRC = RLInterpreter.cpp RLType.cpp RLCommand.cpp
+SRC = RLInterpreter.cpp RLType.cpp RLCommand.cpp RLRoboMaze.cpp
 
 OBJ = $(SRC:.cpp=.o)
 

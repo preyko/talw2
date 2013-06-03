@@ -4,6 +4,8 @@ LEX = flex
 CPP = g++
 CC = gcc
 
+CFLAGS=-fpermissive
+
 LIBNAME=rlprecomp
 LIBFILE=lib$(LIBNAME).a
 
@@ -29,13 +31,13 @@ $(BUILDDIR)/tokenizer.c: tokenizer.l
 
 
 $(BUILDDIR)/precompiler.o: $(BUILDDIR)/precompiler.cc
-	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
+	$(CPP) $(CFLAGS) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/precompiler.cc -o $(BUILDDIR)/precompiler.o
 
 $(BUILDDIR)/token_reader.o: $(BUILDDIR)/token_reader.c
-	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
+	$(CPP) $(CFLAGS) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/token_reader.c -o $(BUILDDIR)/token_reader.o
 
 $(BUILDDIR)/tokenizer.o: $(BUILDDIR)/tokenizer.c
-	$(CPP) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/tokenizer.c -o $(BUILDDIR)/tokenizer.o
+	$(CPP) $(CFLAGS) $(INCLUDDIR) $(DEBUG) -c $(BUILDDIR)/tokenizer.c -o $(BUILDDIR)/tokenizer.o
 
 
 clean:

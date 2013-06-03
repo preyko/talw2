@@ -7,6 +7,8 @@
 #include "RLType.h"
 #include "RLCommand.h"
 
+#include "RLRoboMaze.h"
+
 
 class RLProcedure;
 class RLTypePrototype;
@@ -14,18 +16,18 @@ class RLCommandPrototype;
 
 class RLInterpreter {
 public:
-    typedef std::vector<RLProcedure*> StackFunctions;
+    typedef std::vector<RLChainCommands*> StackFunctions;
 
     static void Initialization();
     static void Perform();
 
-    static RLProcedure* getMainFunction();
-    static RLProcedure* getCurrentFunction();
+    static RLChainCommands* getMainFunction();
+    static RLChainCommands* getCurrentFunction();
 
     static void addCommand(RLCommandPrototype* c);
 
-    static void upStack(RLProcedure* u = NULL);
-    static RLProcedure* downStack();
+    static void upStack(RLChainCommands* u = NULL);
+    static RLChainCommands* downStack();
     
     static void setApplicationOutput(std::string fname);
     static void setApplicationOutput(std::ostream& stream);
@@ -37,7 +39,7 @@ public:
     static void unlockLinkProcedurePerforming();
 
 private:
-    static RLProcedure* mainProc_;
+    static RLChainCommands* mainProc_;
 
     static StackFunctions stack_;
 
