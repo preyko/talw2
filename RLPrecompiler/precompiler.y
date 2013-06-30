@@ -82,7 +82,7 @@ MOVEUP MOVEDOWN MOVELEFT MOVERIGHT TP
 MAZESCHEME      // Represented by a two dimensional array, every element of this array is boolean type. True - occupied place, false - not occupied place.
 VISITEDPLACE    // Same as MAZESCHEME, but true - place was visited, vice versa - not.
 ROBOPOS         // Represented by 2-elements array, first - X cooardinate, second - Y cooardinate.
-SHOWMAZE        // Show maze/
+SHOWMAZE        // Show maze.
 
 %right COMPARE
 %right ASSIGN

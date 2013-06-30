@@ -12,8 +12,8 @@ void RLInterpreter::Initialization() {
 
     stack_.push_back(mainProc_);
 
-    RLRoboMaze::setMazeSize(10,10);
-    RLRoboMaze::setRoboPosition(0,0);
+    RLRoboMaze::reset();
+    RLRoboMaze::setSize(10,10);
 }
 
 void RLInterpreter::Perform() {

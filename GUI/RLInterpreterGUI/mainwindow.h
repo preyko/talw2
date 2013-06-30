@@ -4,10 +4,15 @@
 #include <iostream>
 
 #include <QMainWindow>
-
 #include <QMessageBox>
+#include <QWidget>
+#include <QLabel>
+
 #include <QFileDialog>
 #include <QFile>
+
+#include <QPainter>
+#include <QPixmap>
 
 #include <QPoint>
 
@@ -39,9 +44,14 @@ public slots:
     void saveRLFile();
     void saveAsRLFile();
 
+    void openMazeFile();
+    void clearMaze();
+
     void startProcess();
 
     void codeChanged();
+
+    void showMaze();
     
     void setTitle(QString title = "");
 

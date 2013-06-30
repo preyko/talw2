@@ -13,13 +13,13 @@ public:
     virtual ~RLApplication() { }
 
     virtual bool notify(QObject * receiver, QEvent * event) {
-        try {
+        //try {
             return QApplication::notify(receiver, event);
-        } catch(std::exception& e) {
-            qCritical() << "Exception thrown:" << e.what();
-        } catch(const char* e) {
-            qCritical() << "Exception thrown:" << e;
-        }
+        //} catch(std::exception& e) {
+        //    qCritical() << "Exception thrown:" << e.what();
+        //} catch(const char* e) {
+        //    qCritical() << "Exception thrown:" << e;
+        //}
 
         return false;
     }
