@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->codeBrowser,SIGNAL(codeChanged()),SLOT(codeChanged()));
     
     setTitle();
+
+    RLRoboMaze::Init();
 }
 
 void MainWindow::openRLFile() {

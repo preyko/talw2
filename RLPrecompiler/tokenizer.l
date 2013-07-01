@@ -73,14 +73,14 @@ print                   getTokenizerOutput() << "PRINT ";
 printall                getTokenizerOutput() << "PRINTALL ";
 
         /* Robocommands */
-rup                     getTokenizerOutput() << "MOVEUP ";
-rdown                   getTokenizerOutput() << "MOVEDOWN ";
-rleft                   getTokenizerOutput() << "MOVELEFT ";
-rright                  getTokenizerOutput() << "MOVERIGHT ";
-rtp                     getTokenizerOutput() << "TP ";
+mu                      getTokenizerOutput() << "MOVEUP ";
+md                      getTokenizerOutput() << "MOVEDOWN ";
+ml                      getTokenizerOutput() << "MOVELEFT ";
+mr                      getTokenizerOutput() << "MOVERIGHT ";
+tp                      getTokenizerOutput() << "TP ";
 rmaze                   getTokenizerOutput() << "MAZESCHEME ";
 vp                      getTokenizerOutput() << "VISITEDPLACE ";
-rposition               getTokenizerOutput() << "ROBOPOS ";
+rpos                    getTokenizerOutput() << "ROBOPOS ";
 
 show_maze               getTokenizerOutput() << "SHOWMAZE ";
 

@@ -9,13 +9,21 @@ RLRoboMaze::Maze RLRoboMaze::mazeVisited_ = RLRoboMaze::Maze();
 RLRoboMaze::MazeSize RLRoboMaze::mazeSize_ = RLRoboMaze::MazeSize();
 
 
+void RLRoboMaze::Init() {
+    startRoboPos_.x = 0;
+    startRoboPos_.y = 0;
+
+    roboPos_.x = 0;
+    roboPos_.y = 0;
+}
+
 bool RLRoboMaze::moveRobot(RLRoboMaze::Action action) {
     switch(action) {
         case mdown:
             return setRoboPosition(roboPos_.x,roboPos_.y+1);
         break;
         case mup:
-            return setRoboPosition(roboPos_.x,--roboPos_.y-1);
+            return setRoboPosition(roboPos_.x,roboPos_.y-1);
         break;
         case mleft:
             return setRoboPosition(roboPos_.x-1,roboPos_.y);
@@ -106,6 +114,9 @@ void RLRoboMaze::reset() {
     for(int x = 0; x < mazeVisited_.size(); x++)
         for(int y = 0; y < mazeVisited_.at(x).size(); y++)
             mazeVisited_.at(x).at(y) = false;
+
+    roboPos_.x = startRoboPos_.x;
+    roboPos_.y = startRoboPos_.y;
 }
 
 RLRoboMaze::CellState RLRoboMaze::getCellState(int x, int y) {

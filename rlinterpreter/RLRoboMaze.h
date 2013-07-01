@@ -16,6 +16,8 @@ public:
     typedef struct { int x; int y; } RoboPosition;
     typedef std::vector<std::vector<bool> > Maze;
 
+    static void Init();
+
     static bool moveRobot(Action action);
 
     static RoboPosition getRoboPosition();
