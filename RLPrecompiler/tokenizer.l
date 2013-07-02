@@ -106,7 +106,7 @@ show_maze               getTokenizerOutput() << "SHOWMAZE ";
 
 <ERRTOKEN>
 {
-[ ]                     BEGIN(INITIAL);
+[ \n]                   BEGIN(INITIAL);
 .                       {
                             std::cout << exceptions_.getCollectioner().size() << std::endl;
                             exceptions_.getLast().what() += yytext;

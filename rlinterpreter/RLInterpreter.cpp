@@ -13,7 +13,6 @@ void RLInterpreter::Initialization() {
     stack_.push_back(mainProc_);
 
     RLRoboMaze::reset();
-    RLRoboMaze::setSize(10,10);
 }
 
 void RLInterpreter::Perform() {

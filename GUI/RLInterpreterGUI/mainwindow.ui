@@ -36,7 +36,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget_2">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="codeTab">
        <attribute name="title">
@@ -230,16 +230,53 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="mazeScheme">
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255)</string>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
           </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>897</width>
+             <height>564</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <property name="spacing">
+             <number>0</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="mazeScheme">
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(255, 255, 255)</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -278,12 +315,12 @@
    <addaction name="actionOpen_RL_file"/>
    <addaction name="actionSave_RL_file"/>
    <addaction name="actionSave_as"/>
-   <addaction name="actionProcess"/>
    <addaction name="separator"/>
-   <addaction name="actionShow_Maze"/>
    <addaction name="actionLoad_Maze_Shceme"/>
    <addaction name="actionClear_Maze"/>
    <addaction name="separator"/>
+   <addaction name="actionShow_Maze"/>
+   <addaction name="actionProcess"/>
   </widget>
   <action name="actionOpen_RL_file">
    <property name="checkable">

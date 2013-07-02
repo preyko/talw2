@@ -207,7 +207,10 @@ void MainWindow::showMaze() {
     painter.end();
 
     //ui->mazeScheme->setPixmap(maze_pic);
-    ui->mazeScheme->setPixmap(maze_pic.scaled(ui->mazeScheme->size()));
+    if(ui->mazeScheme->size().width() > maze_pic_w || ui->mazeScheme->size().height() > maze_pic_h)
+        ui->mazeScheme->setPixmap(maze_pic.scaled(ui->mazeScheme->size(),Qt::KeepAspectRatio));
+    else
+        ui->mazeScheme->setPixmap(maze_pic);
 }
 
 void MainWindow::setTitle(QString title) {

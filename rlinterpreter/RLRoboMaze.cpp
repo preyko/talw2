@@ -10,11 +10,12 @@ RLRoboMaze::MazeSize RLRoboMaze::mazeSize_ = RLRoboMaze::MazeSize();
 
 
 void RLRoboMaze::Init() {
+    setSize(10,10);
+
     startRoboPos_.x = 0;
     startRoboPos_.y = 0;
 
-    roboPos_.x = 0;
-    roboPos_.y = 0;
+    setRoboPosition(0,0);
 }
 
 bool RLRoboMaze::moveRobot(RLRoboMaze::Action action) {
@@ -115,8 +116,7 @@ void RLRoboMaze::reset() {
         for(int y = 0; y < mazeVisited_.at(x).size(); y++)
             mazeVisited_.at(x).at(y) = false;
 
-    roboPos_.x = startRoboPos_.x;
-    roboPos_.y = startRoboPos_.y;
+    setRoboPosition(startRoboPos_.x,startRoboPos_.y);
 }
 
 RLRoboMaze::CellState RLRoboMaze::getCellState(int x, int y) {
